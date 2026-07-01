@@ -1,0 +1,3 @@
+project_id,unit_label,unit_type,bedrooms,bathrooms,built_up_area,carpet_area,plot_area,price_label,starting_price,floor_plan_path,floor_plan_permission_status,availability_status
+"proj-prestige-lakeside","3 BHK Premium Apartment","apartment",3,3,"1960 Sq.Ft.","1450 Sq.Ft.","","₹1.8 Crores+",18000000,"","pending_permission","available"
+"proj-brigade-el-dorado","2 BHK Apartment","apartment",2,2,"930 Sq.Ft.","Not publicly confirmed","","₹45 Lakhs+",4500000,"","pending_permission","available"

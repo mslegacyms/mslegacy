@@ -1,0 +1,3 @@
+project_id,verification_type,source_name,source_url,verified_value,verification_status,verified_by,notes
+"proj-prestige-lakeside","rera","Karnataka RERA portal","https://rera.karnataka.gov.in","PRM/KA/RERA/...","verified","","Checked registration number on RERA portal"
+"proj-brigade-el-dorado","rera","Karnataka RERA portal","https://rera.karnataka.gov.in","PRM/KA/RERA/1251/309/PR/190913/002873","pending_verification","","RERA registry number identified from builder website, manual check pending."

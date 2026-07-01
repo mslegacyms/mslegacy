@@ -1,0 +1,3 @@
+project_id,asset_type,title,storage_path,external_url,permission_status,caption,display_order
+"proj-prestige-lakeside","hero_image","Lakeside Habitat Hero","","","pending_permission","Front entrance elevation layout",1
+"proj-brigade-el-dorado","hero_image","El Dorado Hero","","","permission_received","Bagalur entrance main elevation",1

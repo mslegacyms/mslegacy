@@ -1,0 +1,2 @@
+This folder holds authorized builder and developer logos for the MS Legacy marketplace.
+All logos inside this folder are verified against permission agreements.
