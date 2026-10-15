@@ -1,12 +1,61 @@
-import type { Metadata } from "next";
-import { businessContact } from "@/lib/company/contact";
-export const metadata: Metadata = { title: "Privacy notice | MS LEGACY", alternates: { canonical: "/privacy" } };
-export default function PrivacyPage() { return <article className="max-w-3xl mx-auto px-6 py-16 space-y-6 text-slate-700">
-  <h1 className="font-serif text-4xl font-bold text-[#10291f]">Privacy notice</h1>
-  <p>MS LEGACY uses the information you submit to respond to your enquiry and manage the related request.</p>
-  <h2 className="text-xl font-bold">Information you provide</h2><p>Forms may ask for your name, contact details, preferred location, budget, project selections and message. Partner applications also ask for business and registration details. Do not include identity documents, bank details or confidential deeds in a public message.</p>
-  <h2 className="text-xl font-bold">Use and access</h2><p>Authorized team members use saved enquiries to follow up and manage the requested service. Hosting and database providers process information to operate the site. A project enquiry does not authorize unrelated marketing or onward sharing with a developer; any additional sharing should be agreed with you.</p>
-  <h2 className="text-xl font-bold">Portal and browser drafts</h2><p>Secure portal sign-in uses authentication cookies. Working legal drafts currently stay in the signed-in user’s browser tab; they are not an official document archive or approval record. Keep your own authorized copy of required working material and sign out on shared devices.</p>
-  <h2 className="text-xl font-bold">Analytics</h2><p>Optional third-party analytics tracking is currently disabled.</p>
-  <h2 className="text-xl font-bold">Questions and requests</h2><p>Contact <a className="underline" href="mailto:mslegacyms@gmail.com">{businessContact.email}</a> about access, correction or deletion of submitted information. MS LEGACY will review the request, verify the relevant identity and explain any applicable retention obligation.</p>
-</article>; }
+import { PublicIntro } from "@/components/public/PublicComponents";
+import { pageMetadata, publicSite } from "@/lib/publicSite";
+export const metadata = pageMetadata(
+  "Privacy Notice",
+  "How the MS LEGACY website’s enquiry draft and direct-contact options handle the information you choose to provide.",
+  "/privacy",
+);
+export default function PrivacyPage() {
+  return (
+    <>
+      <PublicIntro
+        eyebrow="Website information"
+        title="Privacy notice"
+        description="This notice describes the public website’s enquiry-draft and direct-contact flow."
+      />
+      <section className="site-section">
+        <div className="site-container site-prose">
+          <p className="site-caption">Updated 16 October 2026</p>
+          <h2>Information you choose to provide</h2>
+          <p>
+            The enquiry composer asks for your name, preferred contact detail
+            and the service you need. Location, budget and a message are
+            optional. Please do not include identity numbers, bank details or
+            confidential property documents.
+          </p>
+          <h2>Preparing and sending a message</h2>
+          <p>
+            Preparing a draft does not submit the form to an MS LEGACY database.
+            Its contents remain in the current page and are not saved by the
+            composer to browser storage. Opening email or WhatsApp passes the
+            draft to that service; you decide whether to send it there. Those
+            services process information under their own terms.
+          </p>
+          <h2>Contact about your enquiry</h2>
+          <p>
+            If you send a message, MS LEGACY can use the details you provide to
+            discuss that enquiry. Before sharing private documents or starting
+            an engagement, ask about the appropriate transfer method, service
+            providers involved and document-handling arrangements.
+          </p>
+          <h2>Technical information</h2>
+          <p>
+            The hosting service may process routine technical connection and
+            server logs. This version of the public website does not load its
+            optional Google Analytics integration. External sites and messaging
+            apps have their own data practices.
+          </p>
+          <h2>Questions and requests</h2>
+          <p>
+            For questions about information you have shared, correction or
+            deletion requests, contact{" "}
+            <a href={publicSite.emailHref}>{publicSite.email}</a> or{" "}
+            <a href={publicSite.phoneHref}>{publicSite.phone}</a>. Identify the
+            enquiry concerned without including confidential documents in your
+            initial request.
+          </p>
+        </div>
+      </section>
+    </>
+  );
+}

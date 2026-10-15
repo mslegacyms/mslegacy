@@ -1,29 +1,34 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { getProjectBySlug } from "@/lib/developers/projects";
-
-interface Props {
+import { isPublicProject, isResearchProject } from "@/lib/projectPresentation";
+import { pageMetadata } from "@/lib/publicSite";
+export async function generateMetadata({
+  params,
+}: {
   params: Promise<{ slug: string }>;
-  children: React.ReactNode;
-}
-
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+}): Promise<Metadata> {
   const { slug } = await params;
   const project = await getProjectBySlug(slug);
-
-  if (!project) {
+  if (!project || !isPublicProject(project))
     return {
-      title: "Project Layout Profile | MS Legacy",
+      title: "Property Information",
+      robots: { index: false, follow: true },
     };
-  }
-
   return {
-    title: `${project.name} Review, Location & Details | MS Legacy`,
-    description: `Inspect technical specifications, RERA status, and legal title trails for ${project.name} in ${project.locality}, ${project.city}.`,
+    ...pageMetadata(
+      `${project.name} — Property Information`,
+      `Research ${project.name} and discuss current details with MS LEGACY. Confirm price, availability and property-specific evidence.`,
+      `/projects/${slug}`,
+    ),
+    ...(isResearchProject(project)
+      ? { robots: { index: false, follow: true } }
+      : {}),
   };
 }
-
-export default async function ProjectSlugLayout({ params, children }: Props) {
-  // Await params to satisfy Next.js asynchronous route parameters constraint
-  await params;
+export default function PropertyLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return <>{children}</>;
 }
