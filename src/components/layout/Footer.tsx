@@ -1,3 +1,4 @@
+import { businessContact } from "@/lib/company/contact";
 import React from "react";
 import Link from "next/link";
 import { Mail, Phone, Globe } from "@/components/ui/Icons";
@@ -15,20 +16,20 @@ export const Footer = () => {
               <img src="/brand/mslegacy-logo.svg" alt="MS Legacy Logo" className="h-14 w-auto object-contain" />
             </Link>
             <p className="text-sm text-slate-400 leading-relaxed">
-              India's premier integrated real estate wealth creation and asset management platform. We protect, construct, manage, and scale your real estate assets under one trusted ecosystem.
+              Explore property information, compare options and discuss sourcing, construction, management and document-review requirements with MS LEGACY.
             </p>
             <div className="space-y-3 text-sm text-slate-400">
               <div className="flex items-center space-x-3">
                 <Phone size={16} className="text-[#8b6e3a]" />
-                <span>+91 (80) 4567-8900 (Advisory)</span>
+                <a href="tel:+919035687671">{businessContact.phone}</a>
               </div>
               <div className="flex items-center space-x-3">
                 <Mail size={16} className="text-[#8b6e3a]" />
-                <span>advisory@mslegacy.in</span>
+                <a href="mailto:mslegacyms@gmail.com">{businessContact.email}</a>
               </div>
               <div className="flex items-center space-x-3">
                 <Globe size={16} className="text-[#8b6e3a]" />
-                <span>www.mslegacy.in</span>
+                <span>{businessContact.address}</span>
               </div>
             </div>
           </div>
@@ -152,8 +153,8 @@ export const Footer = () => {
             © {currentYear} MS Legacy Group. All Rights Reserved. Designed for Private Wealth Preservation.
           </div>
           <div className="flex space-x-6">
-            <Link href="/resources" className="hover:underline">Privacy Policy</Link>
-            <Link href="/resources" className="hover:underline">Terms of Use</Link>
+            <Link href="/privacy" className="hover:underline">Privacy Policy</Link>
+            <Link href="/terms" className="hover:underline">Terms of Use</Link>
             <Link href="/project-disclaimer" className="hover:underline">Disclaimers</Link>
           </div>
         </div>

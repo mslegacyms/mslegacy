@@ -10,9 +10,10 @@ interface CalculatorShellProps {
   results: React.ReactNode;
   explanation?: React.ReactNode;
   actionBar?: React.ReactNode;
+  validationError?: string;
 }
 
-export const CalculatorShell = ({ title, subtitle, category, inputs, results, explanation, actionBar }: CalculatorShellProps) => {
+export const CalculatorShell = ({ title, subtitle, category, inputs, results, explanation, actionBar, validationError }: CalculatorShellProps) => {
   return (
     <div className="flex flex-col min-h-screen bg-[#f8f5ef] text-[#10291f] font-sans pb-16">
       <CalculatorHero title={title} subtitle={subtitle} category={category} />
@@ -27,8 +28,7 @@ export const CalculatorShell = ({ title, subtitle, category, inputs, results, ex
 
             {/* Right - Sticky Results Panel */}
             <div className="lg:col-span-5 lg:sticky lg:top-6 bg-[#10291f] text-white p-6 rounded-lg space-y-6 border border-[#1d3e30] shadow-md">
-              {results}
-              {actionBar}
+              {validationError ? <p role="alert" className="text-sm text-white">{validationError} Correct the inputs to see or share an estimate.</p> : <>{results}{actionBar}</>}
             </div>
           </div>
 

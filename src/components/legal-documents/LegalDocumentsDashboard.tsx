@@ -23,8 +23,8 @@ export default function LegalDocumentsDashboard({ userProfile }: LegalDocumentsD
   const [activeTab, setActiveTab] = useState<"all" | "review_queue" | "approved_queue">("all");
 
   useEffect(() => {
-    setDrafts(getStoredDrafts());
-  }, []);
+    setDrafts(getStoredDrafts(userProfile.id));
+  }, [userProfile.id]);
 
   const handleArchive = (id: string) => {
     const updated = drafts.map(d => {
@@ -39,7 +39,7 @@ export default function LegalDocumentsDashboard({ userProfile }: LegalDocumentsD
           timestamp: new Date().toISOString(),
           notes: "Draft archived from dashboard."
         });
-        upsertStoredDraft(archivedDraft);
+        upsertStoredDraft(archivedDraft, userProfile.id);
         return archivedDraft;
       }
       return d;

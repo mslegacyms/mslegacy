@@ -1,77 +1,17 @@
 import { MetadataRoute } from "next";
-import { mockDevelopers } from "@/lib/data/mockDevelopers";
-import { mockDeveloperProjects } from "@/lib/data/mockDeveloperProjects";
+import { getSiteOrigin } from "@/lib/site";
+import { getProjects } from "@/lib/developers/projects";
+import { getDevelopers } from "@/lib/developers/developers";
 import { mockNewsUpdates } from "@/lib/data/mockNewsUpdates";
-
-/**
- * Generates the sitemap.xml dynamically in Next.js App Router.
- */
-export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mslegacy.in";
-
-  const staticRoutes = [
-    "",
-    "/about",
-    "/services",
-    "/services/land-sourcing",
-    "/services/turnkey-construction",
-    "/services/property-management",
-    "/services/legal-due-diligence",
-    "/project-participation",
-    "/property-wealth-score",
-    "/opportunities",
-    "/resources",
-    "/contact",
-    "/channel-partners",
-    "/developers",
-    "/projects",
-    "/calculators",
-    "/news",
-    "/project-disclaimer",
+/** Uses the same catalog adapters as public pages; build time is not a modification date. */
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const base = getSiteOrigin();
+  const routes: string[] = ["", "/about", "/services", "/services/land-sourcing", "/services/turnkey-construction", "/services/property-management", "/services/legal-due-diligence", "/project-participation", "/property-wealth-score", "/opportunities", "/resources", "/contact", "/channel-partners", "/developers", "/projects", "/calculators", "/news", "/project-disclaimer", "/requirements", "/project-enquiry", "/privacy", "/terms", "/calculators/project-shortlist-score", "/calculators/nri-ownership", "/calculators/land-plot-cost", "/calculators/layout-development", "/calculators/home-loan-emi", "/calculators/construction-cost", "/calculators/buyer-affordability", "/calculators/apartment-development", "/calculators/rental-yield", "/calculators/stamp-duty-registration"];
+  const [projects, developers] = await Promise.all([getProjects(), getDevelopers()]);
+  return [
+    ...routes.map(path => ({ url: base + path })),
+    ...projects.filter(project => project.publicVisibility === "published").map(project => ({ url: base + "/projects/" + project.slug })),
+    ...developers.filter(developer => developer.status === "active").map(developer => ({ url: base + "/developers/" + developer.slug })),
+    ...mockNewsUpdates.filter(news => news.isPublished).map(news => ({ url: base + "/news/" + news.slug, ...(news.lastCheckedDate ? { lastModified: news.lastCheckedDate } : {}) })),
   ];
-
-  const sitemapEntries = staticRoutes.map((route) => ({
-    url: `${baseUrl}${route}`,
-    lastModified: new Date().toISOString().split("T")[0],
-    changeFrequency: "weekly" as const,
-    priority: route === "" ? 1.0 : 0.8,
-  }));
-
-  // Append developer slugs
-  mockDevelopers.forEach((dev) => {
-    if (dev.status === "active") {
-      sitemapEntries.push({
-        url: `${baseUrl}/developers/${dev.slug}`,
-        lastModified: new Date().toISOString().split("T")[0],
-        changeFrequency: "weekly" as const,
-        priority: 0.6,
-      });
-    }
-  });
-
-  // Append project slugs
-  mockDeveloperProjects.forEach((proj) => {
-    if (proj.publicVisibility === "published") {
-      sitemapEntries.push({
-        url: `${baseUrl}/projects/${proj.slug}`,
-        lastModified: new Date().toISOString().split("T")[0],
-        changeFrequency: "weekly" as const,
-        priority: 0.6,
-      });
-    }
-  });
-
-  // Append news article slugs
-  mockNewsUpdates.forEach((news) => {
-    if (news.isPublished) {
-      sitemapEntries.push({
-        url: `${baseUrl}/news/${news.slug}`,
-        lastModified: news.lastCheckedDate,
-        changeFrequency: "weekly" as const,
-        priority: 0.5,
-      });
-    }
-  });
-
-  return sitemapEntries;
 }

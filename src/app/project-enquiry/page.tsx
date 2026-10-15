@@ -13,6 +13,8 @@ import { ProjectEnquiryForm } from "@/components/projects/ProjectEnquiryForm";
 function EnquiryContent() {
   const searchParams = useSearchParams();
   const projectSlug = searchParams.get("project") || "";
+  const initialInterestType = searchParams.get("interestType") || undefined;
+  const comparedIds = (searchParams.get("ids") || "").split(",").filter(Boolean).slice(0, 4);
 
   const [projects, setProjects] = useState<DeveloperProject[]>([]);
   const [developers, setDevelopers] = useState<Developer[]>([]);
@@ -42,7 +44,10 @@ function EnquiryContent() {
             Resolving profiles...
           </div>
         ) : (
-          <ProjectEnquiryForm 
+          <ProjectEnquiryForm
+            key={`${projectSlug}:${initialInterestType}:${comparedIds.join(",")}`}
+            initialInterestType={initialInterestType}
+            projectIds={comparedIds.length ? projects.filter(project => comparedIds.includes(project.id)).map(project => project.id) : selectedProject ? [selectedProject.id] : []}
             projectId={selectedProject?.id}
             projectName={selectedProject?.name}
             developerId={selectedDeveloperId}

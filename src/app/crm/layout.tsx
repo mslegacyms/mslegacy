@@ -6,16 +6,11 @@ import { isCrmUser, getRoleLabel } from "@/lib/auth/roles";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Landmark, Users, Activity, ShieldCheck, Compass, Scale } from "@/components/ui/Icons";
-import { cookies } from "next/headers";
+import { logout as handleLogout } from "@/app/login/actions";
 import NotificationBell from "@/components/crm/NotificationBell";
 
 // Server action or utility to handle mock cookies logout
-async function handleLogout() {
-  "use server";
-  const cookieStore = await cookies();
-  cookieStore.delete("mslegacy_mock_user");
-  redirect("/login");
-}
+
 
 export default async function CrmLayout({
   children,

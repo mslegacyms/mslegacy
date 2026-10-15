@@ -1,5 +1,6 @@
+import "server-only";
 import { createClient } from "@supabase/supabase-js";
-import { env, isSupabaseServerConfigured } from "@/lib/env";
+import { env, isSupabaseConfigured } from "@/lib/env";
 
 /**
  * SERVER-ONLY SUPABASE ADMIN CLIENT
@@ -14,11 +15,12 @@ if (typeof window !== "undefined") {
 }
 
 export function createAdminClient() {
-  if (!isSupabaseServerConfigured()) {
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!isSupabaseConfigured() || !serviceKey) {
     throw new Error("Supabase Server credentials missing. Check SUPABASE_SERVICE_ROLE_KEY environment variable.");
   }
   
-  return createClient(env.supabaseUrl, env.supabaseServiceKey, {
+  return createClient(env.supabaseUrl, serviceKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,

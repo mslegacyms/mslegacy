@@ -25,18 +25,18 @@ export const PlotCostCalculator = () => {
         <div className="space-y-3 text-xs">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Plot Area (Sq.Ft)</label>
-              <input 
-                type="number" 
+              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="plotcostcalculator-field-1">Plot Area (Sq.Ft)</label>
+              <input id="plotcostcalculator-field-1"
+                type="number" min="0"
                 value={plotSize} 
                 onChange={(e) => setPlotSize(Number(e.target.value))} 
                 className="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1.5 focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Rate per Sq.Ft (INR)</label>
-              <input 
-                type="number" 
+              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="plotcostcalculator-field-2">Rate per Sq.Ft (INR)</label>
+              <input id="plotcostcalculator-field-2"
+                type="number" min="0"
                 value={ratePerSqFt} 
                 onChange={(e) => setRatePerSqFt(Number(e.target.value))} 
                 className="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1.5 focus:outline-none"
@@ -45,18 +45,18 @@ export const PlotCostCalculator = () => {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Infrastructure Charges</label>
-              <input 
-                type="number" 
+              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="plotcostcalculator-field-3">Infrastructure Charges</label>
+              <input id="plotcostcalculator-field-3"
+                type="number" min="0"
                 value={developmentCharges} 
                 onChange={(e) => setDevelopmentCharges(Number(e.target.value))} 
                 className="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1.5 focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Title Audit Desk Fee</label>
-              <input 
-                type="number" 
+              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="plotcostcalculator-field-4">Title Audit Desk Fee</label>
+              <input id="plotcostcalculator-field-4"
+                type="number" min="0"
                 value={legalCost} 
                 onChange={(e) => setLegalCost(Number(e.target.value))} 
                 className="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1.5 focus:outline-none"

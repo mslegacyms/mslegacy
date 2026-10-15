@@ -47,18 +47,18 @@ export const NriOwnershipCalculator = () => {
         <div className="space-y-3 text-xs">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[#10291f] font-bold text-[10px] uppercase mb-1">Property Value (INR)</label>
-              <input 
-                type="number" 
+              <label className="block text-[#10291f] font-bold text-[10px] uppercase mb-1" htmlFor="nriownershipcalculator-field-1">Property Value (INR)</label>
+              <input id="nriownershipcalculator-field-1"
+                type="number" min="0"
                 value={propertyPrice} 
                 onChange={(e) => setPropertyPrice(Number(e.target.value))} 
                 className="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1.5 focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-[#10291f] font-bold text-[10px] uppercase mb-1">Loan Funding Ratio (%)</label>
-              <input 
-                type="number" 
+              <label className="block text-[#10291f] font-bold text-[10px] uppercase mb-1" htmlFor="nriownershipcalculator-field-2">Loan Funding Ratio (%)</label>
+              <input id="nriownershipcalculator-field-2"
+                type="number" min="0"
                 value={loanPercentage} 
                 onChange={(e) => setLoanPercentage(Number(e.target.value))} 
                 className="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1.5 focus:outline-none"
@@ -67,27 +67,27 @@ export const NriOwnershipCalculator = () => {
           </div>
           <div className="grid grid-cols-3 gap-2">
             <div>
-              <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Maintenance / Yr</label>
-              <input 
-                type="number" 
+              <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1" htmlFor="nriownershipcalculator-field-3">Maintenance / Yr</label>
+              <input id="nriownershipcalculator-field-3"
+                type="number" min="0"
                 value={annualMaintenance} 
                 onChange={(e) => setAnnualMaintenance(Number(e.target.value))} 
                 className="w-full bg-slate-50 border border-slate-200 rounded px-1.5 py-1.5 focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Mngmt Cost / Yr</label>
-              <input 
-                type="number" 
+              <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1" htmlFor="nriownershipcalculator-field-4">Mngmt Cost / Yr</label>
+              <input id="nriownershipcalculator-field-4"
+                type="number" min="0"
                 value={propertyManagementCost} 
                 onChange={(e) => setPropertyManagementCost(Number(e.target.value))} 
                 className="w-full bg-slate-50 border border-slate-200 rounded px-1.5 py-1.5 focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Forex USD Rate</label>
-              <input 
-                type="number" 
+              <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1" htmlFor="nriownershipcalculator-field-5">Forex USD Rate</label>
+              <input id="nriownershipcalculator-field-5"
+                type="number" min="0"
                 step="0.1"
                 value={usdRate} 
                 onChange={(e) => setUsdRate(Number(e.target.value))} 
@@ -96,9 +96,9 @@ export const NriOwnershipCalculator = () => {
             </div>
           </div>
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Expected Rent / Month (INR)</label>
-            <input 
-              type="number" 
+            <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="nriownershipcalculator-field-6">Expected Rent / Month (INR)</label>
+            <input id="nriownershipcalculator-field-6"
+              type="number" min="0"
               value={monthlyRent} 
               onChange={(e) => setMonthlyRent(Number(e.target.value))} 
               className="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1.5 focus:outline-none"

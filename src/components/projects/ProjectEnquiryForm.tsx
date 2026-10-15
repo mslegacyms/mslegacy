@@ -1,5 +1,6 @@
 "use client";
 
+import { getEnquiryIntent } from "@/lib/validation/enquiry";
 import React, { useState } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/Card";
@@ -14,10 +15,13 @@ interface ProjectEnquiryFormProps {
   projectId?: string;
   projectName?: string;
   developerId?: string;
+  initialInterestType?: string;
+  projectIds?: string[];
 }
 
-export const ProjectEnquiryForm = ({ projectId, projectName, developerId }: ProjectEnquiryFormProps) => {
+export const ProjectEnquiryForm = ({ projectId, projectName, developerId, initialInterestType, projectIds }: ProjectEnquiryFormProps) => {
   const [submitted, setSubmitted] = useState(false);
+  const [reference, setReference] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   
@@ -28,7 +32,7 @@ export const ProjectEnquiryForm = ({ projectId, projectName, developerId }: Proj
     cityCountry: "",
     buyerType: "end_user",
     budgetRange: "50l_to_1cr",
-    interestType: projectName ? "project_due_diligence" : "general_advisory",
+    interestType: getEnquiryIntent(initialInterestType, !!projectName),
     needSiteVisit: false,
     needDueDiligence: false,
     needLoanGuidance: false,
@@ -37,6 +41,7 @@ export const ProjectEnquiryForm = ({ projectId, projectName, developerId }: Proj
   });
 
   const interestTypes = [
+    { value: "general_advisory", label: "General Enquiry" },
     { value: "apartment_enquiry", label: "Apartment Enquiry" },
     { value: "plot_enquiry", label: "Plot Enquiry" },
     { value: "villa_enquiry", label: "Villa Enquiry" },
@@ -62,15 +67,20 @@ export const ProjectEnquiryForm = ({ projectId, projectName, developerId }: Proj
         interestType: formData.interestType,
         message: `${formData.message} | Buyer Type: ${formData.buyerType} | Budget: ${formData.budgetRange} | Location: ${formData.cityCountry} | Site Visit: ${formData.needSiteVisit} | Due Diligence: ${formData.needDueDiligence} | Loan: ${formData.needLoanGuidance} | NRI: ${formData.needNriSupport}`,
         projectId,
-        developerId
+        developerId,
+        projectIds,
+        cityCountry: formData.cityCountry,
+        buyerType: formData.buyerType,
+        budgetRange: formData.budgetRange
       });
       if (result.success) {
+        setReference(result.reference || "");
         setSubmitted(true);
       } else {
         setError(result.error || "Submission failed. Please check inputs and try again.");
       }
-    } catch (err: any) {
-      setError(err.message || "An unexpected error occurred during lead capture.");
+    } catch {
+      setError("Your enquiry could not be saved. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -100,7 +110,7 @@ export const ProjectEnquiryForm = ({ projectId, projectName, developerId }: Proj
           </div>
 
           {error && (
-            <div className="bg-rose-500/10 text-rose-700 text-xs p-3 rounded font-semibold border border-rose-500/20">
+            <div role="alert" className="bg-rose-500/10 text-rose-700 text-xs p-3 rounded font-semibold border border-rose-500/20">
               {error}
             </div>
           )}
@@ -108,8 +118,8 @@ export const ProjectEnquiryForm = ({ projectId, projectName, developerId }: Proj
           <div className="space-y-4">
             {/* Full Name */}
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Full Name</label>
-              <input
+              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5" htmlFor="projectenquiryform-field-1">Full Name</label>
+              <input id="projectenquiryform-field-1"
                 type="text"
                 required
                 value={formData.fullName}
@@ -122,8 +132,8 @@ export const ProjectEnquiryForm = ({ projectId, projectName, developerId }: Proj
             {/* Contact Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Phone Number</label>
-                <input
+                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5" htmlFor="projectenquiryform-field-2">Phone Number</label>
+                <input id="projectenquiryform-field-2"
                   type="tel"
                   required
                   value={formData.phone}
@@ -133,8 +143,8 @@ export const ProjectEnquiryForm = ({ projectId, projectName, developerId }: Proj
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Email Address</label>
-                <input
+                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5" htmlFor="projectenquiryform-field-3">Email Address</label>
+                <input id="projectenquiryform-field-3"
                   type="email"
                   required
                   value={formData.email}
@@ -148,8 +158,8 @@ export const ProjectEnquiryForm = ({ projectId, projectName, developerId }: Proj
             {/* City/Country & Buyer Type */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">City / Country</label>
-                <input
+                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5" htmlFor="projectenquiryform-field-4">City / Country</label>
+                <input id="projectenquiryform-field-4"
                   type="text"
                   required
                   value={formData.cityCountry}
@@ -159,8 +169,8 @@ export const ProjectEnquiryForm = ({ projectId, projectName, developerId }: Proj
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Buyer Profile</label>
-                <select
+                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5" htmlFor="projectenquiryform-field-5">Buyer Profile</label>
+                <select id="projectenquiryform-field-5"
                   value={formData.buyerType}
                   onChange={(e) => setFormData({ ...formData, buyerType: e.target.value })}
                   className="w-full text-xs font-semibold bg-white border border-slate-200 rounded px-3 py-2 text-[#10291f] focus:outline-none focus:ring-2 focus:ring-[#8b6e3a]/30"
@@ -177,8 +187,8 @@ export const ProjectEnquiryForm = ({ projectId, projectName, developerId }: Proj
             {/* Budget & Interest Type */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Budget Range</label>
-                <select
+                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5" htmlFor="projectenquiryform-field-6">Budget Range</label>
+                <select id="projectenquiryform-field-6"
                   value={formData.budgetRange}
                   onChange={(e) => setFormData({ ...formData, budgetRange: e.target.value })}
                   className="w-full text-xs font-semibold bg-white border border-slate-200 rounded px-3 py-2 text-[#10291f] focus:outline-none"
@@ -191,8 +201,8 @@ export const ProjectEnquiryForm = ({ projectId, projectName, developerId }: Proj
                 </select>
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Advisory Interest</label>
-                <select
+                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5" htmlFor="projectenquiryform-field-7">Advisory Interest</label>
+                <select id="projectenquiryform-field-7"
                   value={formData.interestType}
                   onChange={(e) => setFormData({ ...formData, interestType: e.target.value })}
                   className="w-full text-xs font-semibold bg-white border border-slate-200 rounded px-3 py-2 text-[#10291f] focus:outline-none"
@@ -249,8 +259,8 @@ export const ProjectEnquiryForm = ({ projectId, projectName, developerId }: Proj
 
             {/* Message */}
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Message Details</label>
-              <textarea
+              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5" htmlFor="projectenquiryform-field-8">Message Details</label>
+              <textarea id="projectenquiryform-field-8"
                 rows={3}
                 value={formData.message}
                 onChange={(e) => setFormData({ ...formData, message: e.target.value })}
@@ -265,7 +275,7 @@ export const ProjectEnquiryForm = ({ projectId, projectName, developerId }: Proj
           </Button>
 
           <p className="text-[10px] text-slate-400 leading-relaxed text-center font-medium">
-            <strong>NDA Protocol:</strong> Your inquiry will be forwarded to the MS Legacy verification desk. No client data is sold or shared with third-party developers. Read our full <Link href="/project-disclaimer" className="text-[#8b6e3a] underline font-bold">Marketplace Disclaimer</Link>.
+            By sending this enquiry, you ask MS LEGACY to contact you about your request. Read our <Link href="/privacy" className="text-[#8b6e3a] underline font-bold">Privacy Notice</Link>.
           </p>
         </form>
       ) : (
@@ -276,7 +286,7 @@ export const ProjectEnquiryForm = ({ projectId, projectName, developerId }: Proj
           <div className="space-y-2">
             <h3 className="font-serif text-2xl font-bold text-[#10291f]">Enquiry Successfully Registered</h3>
             <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed font-medium">
-              MS Legacy advisory team will review your request. An advisor will check RERA entries and contact you within 24 business hours to arrange legal title briefs.
+              Your enquiry has been saved for the MS LEGACY team. Reference: {reference}
             </p>
           </div>
           <Button variant="outline" size="sm" onClick={() => setSubmitted(false)} className="border-gold-elegant text-xs font-bold">

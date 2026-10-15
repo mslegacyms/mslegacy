@@ -35,9 +35,9 @@ export const EmiCalculator = () => {
 
         <div className="space-y-3 text-xs">
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Property Value (INR)</label>
-            <input 
-              type="number" 
+            <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="emicalculator-field-1">Property Value (INR)</label>
+            <input id="emicalculator-field-1"
+              type="number" min="0"
               value={price} 
               onChange={(e) => setPrice(Number(e.target.value))} 
               className="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1.5 focus:outline-none"
@@ -45,18 +45,18 @@ export const EmiCalculator = () => {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Down Payment (INR)</label>
-              <input 
-                type="number" 
+              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="emicalculator-field-2">Down Payment (INR)</label>
+              <input id="emicalculator-field-2"
+                type="number" min="0"
                 value={downPayment} 
                 onChange={(e) => setDownPayment(Number(e.target.value))} 
                 className="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1.5 focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Interest Rate (%)</label>
-              <input 
-                type="number" 
+              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="emicalculator-field-3">Interest Rate (%)</label>
+              <input id="emicalculator-field-3"
+                type="number" min="0"
                 step="0.1"
                 value={interestRate} 
                 onChange={(e) => setInterestRate(Number(e.target.value))} 
@@ -65,9 +65,9 @@ export const EmiCalculator = () => {
             </div>
           </div>
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Tenure (Years)</label>
-            <input 
-              type="number" 
+            <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="emicalculator-field-4">Tenure (Years)</label>
+            <input id="emicalculator-field-4"
+              type="number" min="0"
               value={tenure} 
               onChange={(e) => setTenure(Number(e.target.value))} 
               className="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1.5 focus:outline-none"

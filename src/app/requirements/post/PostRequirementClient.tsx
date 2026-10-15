@@ -10,6 +10,7 @@ import { PropertyRequirement } from "@/lib/types/propertyRequirements";
 
 export default function PostRequirementClient() {
   const [submitted, setSubmitted] = useState(false);
+  const [reference, setReference] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -48,8 +49,8 @@ export default function PostRequirementClient() {
     contactPhone: "",
     contactEmail: "",
     contactCity: "",
-    consentToContact: true,
-    consentToShareSanitized: true
+    consentToContact: false,
+    consentToShareSanitized: false
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -127,6 +128,7 @@ export default function PostRequirementClient() {
       });
 
       if (res.success) {
+        setReference(res.reference || "");
         setSubmitted(true);
       } else {
         setErrorMsg(res.error || "Failed to submit requirement.");
@@ -147,13 +149,13 @@ export default function PostRequirementClient() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h2 className="font-display text-3xl font-bold text-[#10291f]">Requirement Sourced Successfully</h2>
+          <h2 className="font-display text-3xl font-bold text-[#10291f]">Requirement Enquiry Received</h2>
           <p className="text-slate-600 text-sm leading-relaxed">
-            Thank you. Your property requirement has been safely logged in our CRM. To protect client confidentiality, we review and sanitize all inputs before sharing summary parameters with developers or verified agents.
+            Your request has been saved in the private enquiry queue. It has not been published. Reference: {reference}
           </p>
           <div className="p-4 bg-slate-50 border border-slate-200 text-slate-500 rounded text-xs leading-relaxed max-w-md mx-auto">
-            <span className="font-bold text-slate-700 block mb-1">Confidentiality Guarantee</span>
-            We will contact you shortly via phone or email for profile verification before generating matches.
+            <span className="font-bold text-slate-700 block mb-1">Next step</span>
+            The team can use your preferred contact details to discuss your requirements.
           </div>
           <div className="flex gap-4 justify-center pt-2">
             <Link href="/requirements">

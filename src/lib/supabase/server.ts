@@ -1,18 +1,19 @@
+import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { env, isSupabaseConfigured } from "@/lib/env";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 
 /**
  * Creates a Supabase client for use in Server Components, Route Handlers, or Server Actions.
  */
 export async function createClient() {
+  if (!isSupabaseConfigured()) throw new Error("Secure portal is temporarily unavailable.");
   const cookieStore = await cookies();
 
   return createServerClient(
-    supabaseUrl,
-    supabaseAnonKey,
+    env.supabaseUrl,
+    env.supabaseAnonKey,
     {
       cookies: {
         getAll() {

@@ -27,18 +27,18 @@ export const RentalYieldCalculator = () => {
         <div className="space-y-3 text-xs">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Property Price (INR)</label>
-              <input 
-                type="number" 
+              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="rentalyieldcalculator-field-1">Property Price (INR)</label>
+              <input id="rentalyieldcalculator-field-1"
+                type="number" min="0"
                 value={propertyPrice} 
                 onChange={(e) => setPropertyPrice(Number(e.target.value))} 
                 className="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1.5 focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Expected Monthly Rent</label>
-              <input 
-                type="number" 
+              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="rentalyieldcalculator-field-2">Expected Monthly Rent</label>
+              <input id="rentalyieldcalculator-field-2"
+                type="number" min="0"
                 value={monthlyRent} 
                 onChange={(e) => setMonthlyRent(Number(e.target.value))} 
                 className="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1.5 focus:outline-none"
@@ -47,18 +47,18 @@ export const RentalYieldCalculator = () => {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Annual Maintenance</label>
-              <input 
-                type="number" 
+              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="rentalyieldcalculator-field-3">Annual Maintenance</label>
+              <input id="rentalyieldcalculator-field-3"
+                type="number" min="0"
                 value={annualMaintenance} 
                 onChange={(e) => setAnnualMaintenance(Number(e.target.value))} 
                 className="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1.5 focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Vacancy Rate (%)</label>
-              <input 
-                type="number" 
+              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="rentalyieldcalculator-field-4">Vacancy Rate (%)</label>
+              <input id="rentalyieldcalculator-field-4"
+                type="number" min="0"
                 value={vacancyRate} 
                 onChange={(e) => setVacancyRate(Number(e.target.value))} 
                 className="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1.5 focus:outline-none"

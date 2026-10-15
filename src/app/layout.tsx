@@ -1,3 +1,4 @@
+import { getSiteOrigin } from "@/lib/site";
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
 import "./globals.css";
@@ -20,14 +21,15 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "MS Legacy | India's Real Estate Wealth Creation Platform",
+  metadataBase: new URL(getSiteOrigin()),
+  title: "MS LEGACY | Property Information & Planning",
   description: "An integrated ecosystem for land sourcing, turnkey construction, legal audits, property management, and structured project participations.",
   openGraph: {
-    title: "MS Legacy | India's Real Estate Wealth Creation Platform",
+    title: "MS LEGACY | Property Information & Planning",
     description: "An integrated ecosystem for land sourcing, turnkey construction, legal audits, property management, and structured project participations.",
     type: "website",
     locale: "en_IN",
-    url: "https://www.mslegacy.in",
+    url: getSiteOrigin(),
   },
 };
 

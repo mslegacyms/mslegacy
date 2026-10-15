@@ -7,8 +7,7 @@ import { isSupabaseConfigured } from "../env";
 
 export async function createProjectEnquiry(enquiry: Omit<ProjectEnquiry, "id" | "createdAt">): Promise<{ success: boolean; error?: string }> {
   if (!isSupabaseConfigured()) {
-    console.log("Mock Log: Project Enquiry Submitted:", enquiry);
-    return { success: true };
+    return { success: false, error: "Enquiries are temporarily unavailable. Please try again later." };
   }
 
   try {

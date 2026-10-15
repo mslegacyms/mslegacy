@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { monthlyPayment, prepaymentImpact, validateNumbers } from "@/lib/calculators/financialMath";
 import { formatINR } from "@/lib/utils";
 import { CalculatorShell } from "./CalculatorShell";
 import { CalculatorActionBar } from "./CalculatorActionBar";
@@ -17,34 +18,18 @@ export const HomeLoanEmiDetailedCalculator = () => {
   const [monthlyIncome, setMonthlyIncome] = useState(150000);
   const [existingEmis, setExistingEmis] = useState(15000);
 
+  const validationError = validateNumbers({ propertyValue, downPayment, interestRate, tenure, processingFee, insuranceEstimate, prepaymentAmount, monthlyIncome, existingEmis }, ["propertyValue", "tenure", "monthlyIncome"], ["interestRate"])
+    || (downPayment > propertyValue ? "Down payment cannot exceed property value." : undefined)
+    || (tenure > 50 || !Number.isInteger(tenure * 12) ? "Enter a term of up to 50 years in whole months." : undefined);
   const loanAmount = Math.max(0, propertyValue - downPayment);
-  const monthlyRate = interestRate / 12 / 100;
-  const numberOfMonths = tenure * 12;
-
-  let emi = 0;
-  if (monthlyRate > 0) {
-    emi = (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, numberOfMonths)) / 
-          (Math.pow(1 + monthlyRate, numberOfMonths) - 1);
-  } else {
-    emi = loanAmount / numberOfMonths;
-  }
-
+  const numberOfMonths = Math.round(tenure * 12);
+  const emi = monthlyPayment(loanAmount, interestRate, numberOfMonths);
   const totalRepayment = emi * numberOfMonths;
-  const totalInterest = totalRepayment - loanAmount;
-  const ltv = (loanAmount / propertyValue) * 100;
-  const emiToIncome = ((emi + existingEmis) / monthlyIncome) * 100;
-
-  // Prepayment impact estimation (simplified)
-  let interestSaved = 0;
-  let monthsReduced = 0;
-  if (prepaymentAmount > 0 && emi > 0) {
-    const annualMultiplier = prepaymentFrequency === "annual" ? tenure : 1;
-    const totalPrepayments = prepaymentAmount * annualMultiplier;
-    interestSaved = Math.min(totalInterest, totalPrepayments * 0.7); // approximate interest savings
-    monthsReduced = Math.min(numberOfMonths - 24, Math.round((totalPrepayments / emi) * 0.8));
-  }
-
-  const suggestedMaxEmi = monthlyIncome * 0.4 - existingEmis;
+  const totalInterest = Math.max(0, totalRepayment - loanAmount);
+  const ltv = propertyValue > 0 ? loanAmount / propertyValue * 100 : 0;
+  const emiToIncome = monthlyIncome > 0 ? (emi + existingEmis) / monthlyIncome * 100 : 0;
+  const { interestSaved, monthsReduced } = prepaymentImpact(loanAmount, interestRate, numberOfMonths, prepaymentAmount, prepaymentFrequency);
+  const suggestedMaxEmi = Math.max(0, monthlyIncome * 0.4 - existingEmis);
 
   // Build Markdown summary for Copy Summary action
   const summaryMarkdown = `### Home Loan EMI Detailed Projections
@@ -55,7 +40,7 @@ export const HomeLoanEmiDetailedCalculator = () => {
 *   **Monthly EMI**: ${formatINR(Math.round(emi))}
 *   **EMI-to-Income Ratio**: ${emiToIncome.toFixed(1)}% (Limit: 40%)
 *   **Total Interest Payable**: ${formatINR(Math.round(totalInterest))}
-*   **Prepayment Savings Est.**: ${formatINR(Math.round(interestSaved))} (Tenure reduced by ~${monthsReduced} months)
+*   **Prepayment Savings (fixed-rate schedule)**: ${formatINR(Math.round(interestSaved))} (Tenure reduced by ~${monthsReduced} months)
 *   **Suggested Max EMI**: ${formatINR(Math.round(suggestedMaxEmi))}
 *   *Note: Planning estimates only. Confirm eligibility with lenders.*`;
 
@@ -67,18 +52,18 @@ export const HomeLoanEmiDetailedCalculator = () => {
       
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Property Value (INR)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="homeloanemidetailedcalculator-field-1">Property Value (INR)</label>
+          <input id="homeloanemidetailedcalculator-field-1"
+            type="number" min="0"
             value={propertyValue}
             onChange={(e) => setPropertyValue(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none focus:border-gold-elegant"
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Down Payment (INR)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="homeloanemidetailedcalculator-field-2">Down Payment (INR)</label>
+          <input id="homeloanemidetailedcalculator-field-2"
+            type="number" min="0"
             value={downPayment}
             onChange={(e) => setDownPayment(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none focus:border-gold-elegant"
@@ -88,9 +73,9 @@ export const HomeLoanEmiDetailedCalculator = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Interest Rate (% p.a.)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="homeloanemidetailedcalculator-field-3">Interest Rate (% p.a.)</label>
+          <input id="homeloanemidetailedcalculator-field-3"
+            type="number" min="0"
             step="0.05"
             value={interestRate}
             onChange={(e) => setInterestRate(Number(e.target.value))}
@@ -98,9 +83,9 @@ export const HomeLoanEmiDetailedCalculator = () => {
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Tenure (Years)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="homeloanemidetailedcalculator-field-4">Tenure (Years)</label>
+          <input id="homeloanemidetailedcalculator-field-4"
+            type="number" min="0"
             value={tenure}
             onChange={(e) => setTenure(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none focus:border-gold-elegant"
@@ -114,17 +99,17 @@ export const HomeLoanEmiDetailedCalculator = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Prepayment Amount (INR)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="homeloanemidetailedcalculator-field-5">Prepayment Amount (INR)</label>
+          <input id="homeloanemidetailedcalculator-field-5"
+            type="number" min="0"
             value={prepaymentAmount}
             onChange={(e) => setPrepaymentAmount(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none focus:border-gold-elegant"
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Prepayment Frequency</label>
-          <select
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="homeloanemidetailedcalculator-field-6">Prepayment Frequency</label>
+          <select id="homeloanemidetailedcalculator-field-6"
             value={prepaymentFrequency}
             onChange={(e) => setPrepaymentFrequency(e.target.value)}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none focus:border-gold-elegant"
@@ -137,18 +122,18 @@ export const HomeLoanEmiDetailedCalculator = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Monthly Take-Home Income (INR)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="homeloanemidetailedcalculator-field-7">Monthly Take-Home Income (INR)</label>
+          <input id="homeloanemidetailedcalculator-field-7"
+            type="number" min="0"
             value={monthlyIncome}
             onChange={(e) => setMonthlyIncome(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none focus:border-gold-elegant"
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Existing Monthly EMIs (INR)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="homeloanemidetailedcalculator-field-8">Existing Monthly EMIs (INR)</label>
+          <input id="homeloanemidetailedcalculator-field-8"
+            type="number" min="0"
             value={existingEmis}
             onChange={(e) => setExistingEmis(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none focus:border-gold-elegant"
@@ -158,18 +143,18 @@ export const HomeLoanEmiDetailedCalculator = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Processing Fees (INR)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="homeloanemidetailedcalculator-field-9">Processing Fees (INR)</label>
+          <input id="homeloanemidetailedcalculator-field-9"
+            type="number" min="0"
             value={processingFee}
             onChange={(e) => setProcessingFee(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3.5 py-1.5 text-[#10291f] font-semibold focus:outline-none focus:border-gold-elegant"
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Property Insurance Est (INR)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="homeloanemidetailedcalculator-field-10">Property Insurance Est (INR)</label>
+          <input id="homeloanemidetailedcalculator-field-10"
+            type="number" min="0"
             value={insuranceEstimate}
             onChange={(e) => setInsuranceEstimate(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3.5 py-1.5 text-[#10291f] font-semibold focus:outline-none focus:border-gold-elegant"
@@ -269,6 +254,7 @@ export const HomeLoanEmiDetailedCalculator = () => {
 
   return (
     <CalculatorShell
+      validationError={validationError}
       title="Home Loan EMI Calculator"
       subtitle="Analyze monthly outflows, interest splits, prepayment benefits, and debt-to-income limits."
       category="Buyer Planning"

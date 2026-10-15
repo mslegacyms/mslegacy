@@ -1,10 +1,10 @@
+import { submitContactForm } from "@/app/contact/actions";
 // requirements.ts
 // Data actions for Property Requirements Exchange with Supabase & Mock Fallback
 
 import { createClient } from "../supabase/client";
 import { isSupabaseConfigured } from "../env";
 import { PropertyRequirement, RequirementMatch, RequirementResponse, RequirementActivityLog } from "../types/propertyRequirements";
-import { mockPropertyRequirements, mockRequirementMatches, mockRequirementResponses, mockRequirementActivityLogs } from "../data/mockPropertyRequirements";
 
 // Helper mapper for property_requirements (DB -> TS)
 function mapRequirementToTS(dbReq: any): PropertyRequirement {
@@ -61,58 +61,17 @@ function mapRequirementToTS(dbReq: any): PropertyRequirement {
 }
 
 // In-Memory Fallbacks for mock data mutations
-let mutableMockRequirements: PropertyRequirement[] = [...mockPropertyRequirements];
-let mutableMockMatches: RequirementMatch[] = [...mockRequirementMatches];
-let mutableMockResponses: RequirementResponse[] = [...mockRequirementResponses];
-let mutableMockLogs: RequirementActivityLog[] = [...mockRequirementActivityLogs];
 
 // 1. Fetch public sanitized requirements
 export async function getPublicRequirements(): Promise<PropertyRequirement[]> {
-  if (!isSupabaseConfigured()) {
-    return mutableMockRequirements.filter(
-      r => r.publicVisibility === 'public_sanitized' && 
-           ['approved_public', 'matched', 'shared_with_partners'].includes(r.verificationStatus)
-    );
-  }
-
-  try {
-    const supabase = createClient();
-    const { data, error } = await supabase
-      .from("property_requirements")
-      .select("*")
-      .eq("public_visibility", "public_sanitized")
-      .in("verification_status", ["approved_public", "matched", "shared_with_partners"])
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("Error fetching public requirements from Supabase:", error.message);
-      return [];
-    }
-
-    return (data || []).map(mapRequirementToTS);
-  } catch (err) {
-    console.error("Failed to fetch public requirements:", err);
-    return [];
-  }
+  // Publication remains disabled until a safe public/private schema split is deployed.
+  return [];
 }
 
 // 2. Fetch single requirement by slug (sanitized or full)
 export async function getRequirementBySlug(slug: string, isCrmUser: boolean = false): Promise<PropertyRequirement | null> {
-  if (!isSupabaseConfigured()) {
-    const found = mutableMockRequirements.find((r) => r.slug === slug);
-    if (!found) return null;
-    if (isCrmUser) return found;
-    
-    // Sanitize for public views
-    return {
-      ...found,
-      contactName: undefined,
-      contactPhone: undefined,
-      contactEmail: undefined,
-      contactCity: undefined,
-      internalNotes: undefined
-    };
-  }
+  if (!isCrmUser) return null;
+  if (!isSupabaseConfigured()) return null;
 
   try {
     const supabase = createClient();
@@ -147,9 +106,7 @@ export async function getRequirementBySlug(slug: string, isCrmUser: boolean = fa
 
 // 3. Fetch CRM list
 export async function getCrmRequirements(): Promise<PropertyRequirement[]> {
-  if (!isSupabaseConfigured()) {
-    return mutableMockRequirements;
-  }
+  if (!isSupabaseConfigured()) return [];
 
   try {
     const supabase = createClient();
@@ -173,133 +130,29 @@ export async function getCrmRequirements(): Promise<PropertyRequirement[]> {
 // 4. Create Public Submission Form entry
 export async function createPublicRequirementSubmission(
   req: Omit<PropertyRequirement, "id" | "requirementCode" | "slug" | "createdAt" | "updatedAt" | "verificationStatus" | "publicVisibility" | "sourceType" | "priority">
-): Promise<{ success: boolean; data?: PropertyRequirement; error?: string }> {
-  const code = "REQ-" + new Date().getFullYear() + "-" + Math.floor(1000 + Math.random() * 9000);
-  const slug = req.title.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + Math.floor(100 + Math.random() * 900);
-  
-  if (!isSupabaseConfigured()) {
-    const newReq: PropertyRequirement = {
-      ...req,
-      id: "req-" + Math.floor(100000 + Math.random() * 900000),
-      requirementCode: code,
-      slug,
-      verificationStatus: "new",
-      publicVisibility: req.consentToShareSanitized ? "public_sanitized" : "private",
-      sourceType: "client_submitted",
-      priority: "medium",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    mutableMockRequirements.unshift(newReq);
-    
-    // Log Activity
-    mutableMockLogs.unshift({
-      id: "log-" + Math.floor(10000 + Math.random() * 90000),
-      requirementId: newReq.id,
-      action: "created_public_submission",
-      notes: "Public requirement submission received from client.",
-      createdAt: new Date().toISOString()
-    });
-    
-    return { success: true, data: newReq };
+): Promise<{ success: boolean; error?: string; reference?: string }> {
+  if (!req || !req.consentToContact || !Number.isFinite(req.budgetMin) || !Number.isFinite(req.budgetMax) || req.budgetMin < 0 || req.budgetMax < req.budgetMin) {
+    return { success: false, error: "Check your budget range and permission to contact you." };
   }
-
-  try {
-    const supabase = createClient();
-    const { data, error } = await supabase
-      .from("property_requirements")
-      .insert([
-        {
-          requirement_code: code,
-          title: req.title,
-          slug: slug,
-          source_type: "client_submitted",
-          requirement_type: req.requirementType,
-          property_category: req.propertyCategory,
-          buyer_profile: req.buyerProfile,
-          preferred_city: req.preferredCity,
-          preferred_locations: req.preferredLocations,
-          micro_market: req.microMarket,
-          budget_min: req.budgetMin,
-          budget_max: req.budgetMax,
-          budget_currency: req.budgetCurrency,
-          land_size_min: req.landSizeMin,
-          land_size_max: req.landSizeMax,
-          land_size_unit: req.landSizeUnit,
-          builtup_area_min: req.builtupAreaMin,
-          builtup_area_max: req.builtupAreaMax,
-          bedrooms: req.bedrooms,
-          possession_timeline: req.possessionTimeline,
-          purchase_timeline: req.purchaseTimeline,
-          road_width_requirement: req.roadWidthRequirement,
-          approval_requirement: req.approvalRequirement,
-          rera_required: req.reraRequired,
-          loan_required: req.loanRequired,
-          legal_due_diligence_required: req.legalDueDiligenceRequired,
-          site_visit_required: req.siteVisitRequired,
-          nri_support_required: req.nriSupportRequired,
-          requirement_summary: req.requirementSummary,
-          must_have_features: req.mustHaveFeatures,
-          nice_to_have_features: req.niceToHaveFeatures,
-          restrictions: req.restrictions,
-          public_visibility: req.consentToShareSanitized ? "public_sanitized" : "private",
-          verification_status: "new",
-          priority: "medium",
-          contact_name: req.contactName,
-          contact_phone: req.contactPhone,
-          contact_email: req.contactEmail,
-          contact_city: req.contactCity,
-          consent_to_contact: req.consentToContact,
-          consent_to_share_sanitized: req.consentToShareSanitized,
-        }
-      ])
-      .select()
-      .single();
-
-    if (error) {
-      console.error("Error submitting requirement to Supabase:", error.message);
-      return { success: false, error: error.message };
-    }
-
-    const parsed = mapRequirementToTS(data);
-    await logRequirementActivity(parsed.id, "created_public_submission", "Public requirement submission received from client.");
-
-    return { success: true, data: parsed };
-  } catch (err: any) {
-    console.error("Failed public requirement submission:", err);
-    return { success: false, error: err.message || "Unknown error" };
-  }
+  return submitContactForm({
+    name: req.contactName || "", phone: req.contactPhone || "", email: req.contactEmail || "",
+    location: req.preferredCity, interestType: "property_requirement", buyerType: req.buyerProfile,
+    budgetRange: String(req.budgetMin) + " - " + String(req.budgetMax),
+    message: JSON.stringify({ title: req.title, category: req.propertyCategory, type: req.requirementType,
+      locations: req.preferredLocations, summary: req.requirementSummary, mustHave: req.mustHaveFeatures,
+      niceToHave: req.niceToHaveFeatures, purchaseTimeline: req.purchaseTimeline, consentToShareSanitized: req.consentToShareSanitized }),
+  });
 }
 
 // 5. Create Company Requirement inside CRM
+
 export async function createCompanyRequirement(
   req: Omit<PropertyRequirement, "id" | "requirementCode" | "slug" | "createdAt" | "updatedAt">
 ): Promise<{ success: boolean; data?: PropertyRequirement; error?: string }> {
   const code = "REQ-" + new Date().getFullYear() + "-" + Math.floor(1000 + Math.random() * 9000);
   const slug = req.title.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + Math.floor(100 + Math.random() * 900);
 
-  if (!isSupabaseConfigured()) {
-    const newReq: PropertyRequirement = {
-      ...req,
-      id: "req-" + Math.floor(100000 + Math.random() * 900000),
-      requirementCode: code,
-      slug,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    mutableMockRequirements.unshift(newReq);
-    
-    // Log Activity
-    mutableMockLogs.unshift({
-      id: "log-" + Math.floor(10000 + Math.random() * 90000),
-      requirementId: newReq.id,
-      action: "created_company_posted",
-      notes: `Requirement manually created in CRM by agent and assigned to ${req.assignedTo || 'Unassigned'}.`,
-      createdAt: new Date().toISOString()
-    });
-
-    return { success: true, data: newReq };
-  }
+  if (!isSupabaseConfigured()) return { success: false, error: "This workflow is temporarily unavailable. Your changes were not saved." };
 
   try {
     const supabase = createClient();
@@ -377,28 +230,7 @@ export async function updateRequirementStatus(
   id: string,
   updates: Partial<Pick<PropertyRequirement, "verificationStatus" | "publicVisibility" | "priority" | "assignedTo" | "internalNotes">>
 ): Promise<{ success: boolean; error?: string }> {
-  if (!isSupabaseConfigured()) {
-    const idx = mutableMockRequirements.findIndex(r => r.id === id);
-    if (idx !== -1) {
-      mutableMockRequirements[idx] = {
-        ...mutableMockRequirements[idx],
-        ...updates,
-        updatedAt: new Date().toISOString(),
-        publishedAt: updates.publicVisibility === 'public_sanitized' ? new Date().toISOString() : mutableMockRequirements[idx].publishedAt
-      };
-      
-      // Log Activity
-      mutableMockLogs.unshift({
-        id: "log-" + Math.floor(10000 + Math.random() * 90000),
-        requirementId: id,
-        action: "status_updated",
-        notes: `Requirement parameters updated in CRM: ${Object.keys(updates).join(", ")}.`,
-        createdAt: new Date().toISOString()
-      });
-      return { success: true };
-    }
-    return { success: false, error: "Requirement not found" };
-  }
+  if (!isSupabaseConfigured()) return { success: false, error: "This workflow is temporarily unavailable. Your changes were not saved." };
 
   try {
     const supabase = createClient();
@@ -437,9 +269,7 @@ export async function updateRequirementStatus(
 
 // 7. Get matches for a requirement
 export async function getRequirementMatches(requirementId: string): Promise<RequirementMatch[]> {
-  if (!isSupabaseConfigured()) {
-    return mutableMockMatches.filter(m => m.requirementId === requirementId);
-  }
+  if (!isSupabaseConfigured()) return [];
 
   try {
     const supabase = createClient();
@@ -477,25 +307,7 @@ export async function getRequirementMatches(requirementId: string): Promise<Requ
 export async function createRequirementMatch(
   match: Omit<RequirementMatch, "id" | "createdAt">
 ): Promise<{ success: boolean; error?: string }> {
-  if (!isSupabaseConfigured()) {
-    const newMatch: RequirementMatch = {
-      ...match,
-      id: "match-" + Math.floor(10000 + Math.random() * 90000),
-      createdAt: new Date().toISOString()
-    };
-    mutableMockMatches.unshift(newMatch);
-
-    // Log Activity
-    mutableMockLogs.unshift({
-      id: "log-" + Math.floor(10000 + Math.random() * 90000),
-      requirementId: match.requirementId,
-      action: "match_added",
-      notes: `Matched property suggestion '${match.matchedPropertyTitle || 'Unnamed match'}' (${match.matchType}) added with score ${match.matchScore || 0}%.`,
-      createdAt: new Date().toISOString()
-    });
-
-    return { success: true };
-  }
+  if (!isSupabaseConfigured()) return { success: false, error: "This workflow is temporarily unavailable. Your changes were not saved." };
 
   try {
     const supabase = createClient();
@@ -539,24 +351,7 @@ export async function updateMatchStatus(
   requirementId: string,
   newStatus: RequirementMatch["matchStatus"]
 ): Promise<{ success: boolean; error?: string }> {
-  if (!isSupabaseConfigured()) {
-    const idx = mutableMockMatches.findIndex(m => m.id === matchId);
-    if (idx !== -1) {
-      const oldMatch = mutableMockMatches[idx];
-      mutableMockMatches[idx].matchStatus = newStatus;
-
-      // Log Activity
-      mutableMockLogs.unshift({
-        id: "log-" + Math.floor(10000 + Math.random() * 90000),
-        requirementId: requirementId,
-        action: "match_status_updated",
-        notes: `Match suggestion status for '${oldMatch.matchedPropertyTitle}' updated to '${newStatus}'.`,
-        createdAt: new Date().toISOString()
-      });
-      return { success: true };
-    }
-    return { success: false, error: "Match not found" };
-  }
+  if (!isSupabaseConfigured()) return { success: false, error: "This workflow is temporarily unavailable. Your changes were not saved." };
 
   try {
     const supabase = createClient();
@@ -592,9 +387,7 @@ export async function updateMatchStatus(
 
 // 10. Fetch responder responses for a requirement
 export async function getRequirementResponses(requirementId: string): Promise<RequirementResponse[]> {
-  if (!isSupabaseConfigured()) {
-    return mutableMockResponses.filter(r => r.requirementId === requirementId);
-  }
+  if (!isSupabaseConfigured()) return [];
 
   try {
     const supabase = createClient();
@@ -638,26 +431,7 @@ export async function getRequirementResponses(requirementId: string): Promise<Re
 export async function createRequirementResponse(
   res: Omit<RequirementResponse, "id" | "createdAt" | "responseStatus">
 ): Promise<{ success: boolean; error?: string }> {
-  if (!isSupabaseConfigured()) {
-    const newRes: RequirementResponse = {
-      ...res,
-      id: "res-" + Math.floor(10000 + Math.random() * 90000),
-      responseStatus: "new",
-      createdAt: new Date().toISOString()
-    };
-    mutableMockResponses.unshift(newRes);
-
-    // Log Activity
-    mutableMockLogs.unshift({
-      id: "log-" + Math.floor(10000 + Math.random() * 90000),
-      requirementId: res.requirementId,
-      action: "response_received",
-      notes: `Response proposal received from ${res.responderName} (${res.responderType}): offered '${res.propertyTitle}' at INR ${res.offeredPrice.toLocaleString()}.`,
-      createdAt: new Date().toISOString()
-    });
-
-    return { success: true };
-  }
+  if (!isSupabaseConfigured()) return { success: false, error: "This workflow is temporarily unavailable. Your changes were not saved." };
 
   try {
     const supabase = createClient();
@@ -707,25 +481,7 @@ export async function updateResponseStatus(
   newStatus: RequirementResponse["responseStatus"],
   notes?: string
 ): Promise<{ success: boolean; error?: string }> {
-  if (!isSupabaseConfigured()) {
-    const idx = mutableMockResponses.findIndex(r => r.id === responseId);
-    if (idx !== -1) {
-      const oldRes = mutableMockResponses[idx];
-      mutableMockResponses[idx].responseStatus = newStatus;
-      if (notes !== undefined) mutableMockResponses[idx].internalNotes = notes;
-
-      // Log Activity
-      mutableMockLogs.unshift({
-        id: "log-" + Math.floor(10000 + Math.random() * 90000),
-        requirementId: requirementId,
-        action: "response_status_updated",
-        notes: `Response status from '${oldRes.responderName}' updated to '${newStatus}'. Notes: ${notes || 'None'}`,
-        createdAt: new Date().toISOString()
-      });
-      return { success: true };
-    }
-    return { success: false, error: "Response not found" };
-  }
+  if (!isSupabaseConfigured()) return { success: false, error: "This workflow is temporarily unavailable. Your changes were not saved." };
 
   try {
     const supabase = createClient();
@@ -763,9 +519,7 @@ export async function updateResponseStatus(
 
 // 13. Get Activity Logs for requirement
 export async function getRequirementActivityLogs(requirementId: string): Promise<RequirementActivityLog[]> {
-  if (!isSupabaseConfigured()) {
-    return mutableMockLogs.filter(l => l.requirementId === requirementId);
-  }
+  if (!isSupabaseConfigured()) return [];
 
   try {
     const supabase = createClient();
@@ -801,17 +555,7 @@ export async function logRequirementActivity(
   notes?: string,
   actorId?: string
 ): Promise<{ success: boolean; error?: string }> {
-  if (!isSupabaseConfigured()) {
-    mutableMockLogs.unshift({
-      id: "log-" + Math.floor(10000 + Math.random() * 90000),
-      requirementId,
-      action,
-      notes,
-      actorId,
-      createdAt: new Date().toISOString()
-    });
-    return { success: true };
-  }
+  if (!isSupabaseConfigured()) return { success: false, error: "Activity was not saved because this workflow is unavailable." };
 
   try {
     const supabase = createClient();

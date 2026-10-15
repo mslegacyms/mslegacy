@@ -52,7 +52,7 @@ export default function DraftDetailsPage({ documentId, userProfile }: DraftDetai
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    const data = getStoredDraftById(documentId);
+    const data = getStoredDraftById(documentId, userProfile.id);
     if (data) {
       setDraft(data);
       setPartyOne(data.partyOne);
@@ -72,7 +72,7 @@ export default function DraftDetailsPage({ documentId, userProfile }: DraftDetai
       setTitleDeedAudited(data.status === "legal_reviewed" || data.status === "approved_for_print");
       setStampDutyVerified(data.status === "approved_for_print");
     }
-  }, [documentId]);
+  }, [documentId, userProfile.id]);
 
   if (!draft) {
     return (
@@ -118,7 +118,7 @@ export default function DraftDetailsPage({ documentId, userProfile }: DraftDetai
         notes: "Agreement details modified by editor."
       });
 
-      upsertStoredDraft(updatedDraft);
+      upsertStoredDraft(updatedDraft, userProfile.id);
       setDraft(updatedDraft);
       alert("Draft agreement updated successfully.");
       setActiveTab("preview");
@@ -131,6 +131,7 @@ export default function DraftDetailsPage({ documentId, userProfile }: DraftDetai
   };
 
   const handleReviewAction = (newStatus: DocumentStatus, actionNotes: string) => {
+    if (newStatus === "approved_for_print") { alert("Official approval requires the server review workflow. This remains a working draft."); return; }
     setIsSaving(true);
     try {
       // Build risk remarks summary
@@ -149,14 +150,14 @@ export default function DraftDetailsPage({ documentId, userProfile }: DraftDetai
 
       updatedDraft.approvalHistory.push({
         id: `h-review-${Date.now()}`,
-        action: newStatus === "approved_for_print" ? "approve" : newStatus === "rejected" ? "reject" : "request_review",
+        action: newStatus === "rejected" ? "reject" : "request_review",
         actorName: userProfile.fullName || "Advocate Officer",
         actorRole: userProfile.role,
         timestamp: new Date().toISOString(),
         notes: `${actionNotes}${riskText}`
       });
 
-      upsertStoredDraft(updatedDraft);
+      upsertStoredDraft(updatedDraft, userProfile.id);
       setDraft(updatedDraft);
       alert(`Document status updated to: ${newStatus.replace("_", " ").toUpperCase()}`);
       setActiveTab("preview");
@@ -170,7 +171,7 @@ export default function DraftDetailsPage({ documentId, userProfile }: DraftDetai
 
   const handleDelete = () => {
     if (confirm("Are you sure you want to delete this draft permanent? This action cannot be undone.")) {
-      deleteStoredDraft(draft.id);
+      deleteStoredDraft(draft.id, userProfile.id);
       router.push("/crm/legal-documents");
     }
   };

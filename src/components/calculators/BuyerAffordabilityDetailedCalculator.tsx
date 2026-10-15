@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { affordability, loanFromPayment, validateNumbers } from "@/lib/calculators/financialMath";
 import { formatINR } from "@/lib/utils";
 import { CalculatorShell } from "./CalculatorShell";
 import { CalculatorActionBar } from "./CalculatorActionBar";
@@ -18,30 +19,20 @@ export const BuyerAffordabilityDetailedCalculator = () => {
   const [buyerType, setBuyerType] = useState("end_user"); // end_user, investor, nri, hni
   const [purchaseTimeline, setPurchaseTimeline] = useState("immediate"); // immediate, 3_6_months, 1_year
 
+  const validationError = validateNumbers({ monthlyIncome, coApplicantIncome, existingObligations, householdExpenses, downPayment, emergencyReserve, interestRate, tenure, emiComfortPercent }, ["tenure"], ["interestRate", "emiComfortPercent"])
+    || (monthlyIncome + coApplicantIncome <= 0 ? "Enter a positive household income." : undefined)
+    || (tenure > 50 || !Number.isInteger(tenure * 12) ? "Enter a term of up to 50 years in whole months." : undefined);
   const totalIncome = monthlyIncome + coApplicantIncome;
   const netDownPaymentAvailable = Math.max(0, downPayment - emergencyReserve);
-
-  const safeEmiRatio = emiComfortPercent / 100;
-  const safeEmi = Math.max(0, (totalIncome * safeEmiRatio) - existingObligations);
-  const aggressiveEmi = Math.max(0, (totalIncome * 0.45) - existingObligations);
-
-  const r = interestRate / 12 / 100;
-  const n = tenure * 12;
-
-  let safeLoan = 0;
-  let aggressiveLoan = 0;
-  if (r > 0) {
-    safeLoan = (safeEmi * (Math.pow(1 + r, n) - 1)) / (r * Math.pow(1 + r, n));
-    aggressiveLoan = (aggressiveEmi * (Math.pow(1 + r, n) - 1)) / (r * Math.pow(1 + r, n));
-  } else {
-    safeLoan = safeEmi * n;
-    aggressiveLoan = aggressiveEmi * n;
-  }
+  const safeEmi = affordability(totalIncome, existingObligations, householdExpenses, emiComfortPercent);
+  const aggressiveEmi = affordability(totalIncome, existingObligations, householdExpenses, 45);
+  const safeLoan = loanFromPayment(safeEmi, interestRate, tenure * 12);
+  const aggressiveLoan = loanFromPayment(aggressiveEmi, interestRate, tenure * 12);
 
   const safeBudget = safeLoan + netDownPaymentAvailable;
   const aggressiveBudget = aggressiveLoan + netDownPaymentAvailable;
 
-  const debtToIncome = ((safeEmi + existingObligations) / totalIncome) * 100;
+  const debtToIncome = totalIncome > 0 ? ((safeEmi + existingObligations) / totalIncome) * 100 : 0;
 
   // Readiness Score
   let readinessScore = 70;
@@ -51,7 +42,8 @@ export const BuyerAffordabilityDetailedCalculator = () => {
   readinessScore = Math.max(10, Math.min(100, readinessScore));
 
   const getRecommendation = () => {
-    if (readinessScore >= 80) return "Excellent readiness. Safe budget is fully supported by cash reserves and income buffers.";
+    if (safeEmi <= 0) return "No monthly loan-payment capacity remains after the entered expenses and obligations.";
+    if (readinessScore >= 80) return "Review this planning estimate with a lender; income, expenses, reserves and loan eligibility need verification.";
     if (readinessScore >= 60) return "Moderate readiness. We recommend increasing down-payment capital or paying down current loans.";
     return "Caution: Current debt obligations are high relative to income. Consider lowering your purchase target.";
   };
@@ -76,18 +68,18 @@ export const BuyerAffordabilityDetailedCalculator = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Primary Monthly Income (INR)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="buyeraffordabilitydetailedcalculator-field-1">Primary Monthly Income (INR)</label>
+          <input id="buyeraffordabilitydetailedcalculator-field-1"
+            type="number" min="0"
             value={monthlyIncome}
             onChange={(e) => setMonthlyIncome(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none focus:border-gold-elegant"
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Co-Applicant Monthly Income (INR)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="buyeraffordabilitydetailedcalculator-field-2">Co-Applicant Monthly Income (INR)</label>
+          <input id="buyeraffordabilitydetailedcalculator-field-2"
+            type="number" min="0"
             value={coApplicantIncome}
             onChange={(e) => setCoApplicantIncome(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none focus:border-gold-elegant"
@@ -97,18 +89,18 @@ export const BuyerAffordabilityDetailedCalculator = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Existing Monthly EMIs (INR)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="buyeraffordabilitydetailedcalculator-field-3">Existing Monthly EMIs (INR)</label>
+          <input id="buyeraffordabilitydetailedcalculator-field-3"
+            type="number" min="0"
             value={existingObligations}
             onChange={(e) => setExistingObligations(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none focus:border-gold-elegant"
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Monthly Household Expenses (INR)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="buyeraffordabilitydetailedcalculator-field-4">Monthly Household Expenses (INR)</label>
+          <input id="buyeraffordabilitydetailedcalculator-field-4"
+            type="number" min="0"
             value={householdExpenses}
             onChange={(e) => setHouseholdExpenses(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none focus:border-gold-elegant"
@@ -122,18 +114,18 @@ export const BuyerAffordabilityDetailedCalculator = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Down Payment Liquid Funds (INR)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="buyeraffordabilitydetailedcalculator-field-5">Down Payment Liquid Funds (INR)</label>
+          <input id="buyeraffordabilitydetailedcalculator-field-5"
+            type="number" min="0"
             value={downPayment}
             onChange={(e) => setDownPayment(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none focus:border-gold-elegant"
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Emergency Reserve Holdback (INR)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="buyeraffordabilitydetailedcalculator-field-6">Emergency Reserve Holdback (INR)</label>
+          <input id="buyeraffordabilitydetailedcalculator-field-6"
+            type="number" min="0"
             value={emergencyReserve}
             onChange={(e) => setEmergencyReserve(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none focus:border-gold-elegant"
@@ -143,9 +135,9 @@ export const BuyerAffordabilityDetailedCalculator = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Interest Rate (%)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="buyeraffordabilitydetailedcalculator-field-7">Interest Rate (%)</label>
+          <input id="buyeraffordabilitydetailedcalculator-field-7"
+            type="number" min="0"
             step="0.1"
             value={interestRate}
             onChange={(e) => setInterestRate(Number(e.target.value))}
@@ -153,18 +145,18 @@ export const BuyerAffordabilityDetailedCalculator = () => {
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Tenure (Years)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="buyeraffordabilitydetailedcalculator-field-8">Tenure (Years)</label>
+          <input id="buyeraffordabilitydetailedcalculator-field-8"
+            type="number" min="0"
             value={tenure}
             onChange={(e) => setTenure(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none focus:border-gold-elegant"
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Comfort EMI (%)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="buyeraffordabilitydetailedcalculator-field-9">Comfort EMI (%)</label>
+          <input id="buyeraffordabilitydetailedcalculator-field-9"
+            type="number" min="0"
             value={emiComfortPercent}
             onChange={(e) => setEmiComfortPercent(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none focus:border-gold-elegant"
@@ -174,8 +166,8 @@ export const BuyerAffordabilityDetailedCalculator = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Buyer Segment</label>
-          <select
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="buyeraffordabilitydetailedcalculator-field-10">Buyer Segment</label>
+          <select id="buyeraffordabilitydetailedcalculator-field-10"
             value={buyerType}
             onChange={(e) => setBuyerType(e.target.value)}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none"
@@ -187,8 +179,8 @@ export const BuyerAffordabilityDetailedCalculator = () => {
           </select>
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Purchase Timeline</label>
-          <select
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="buyeraffordabilitydetailedcalculator-field-11">Purchase Timeline</label>
+          <select id="buyeraffordabilitydetailedcalculator-field-11"
             value={purchaseTimeline}
             onChange={(e) => setPurchaseTimeline(e.target.value)}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none"
@@ -287,6 +279,7 @@ export const BuyerAffordabilityDetailedCalculator = () => {
 
   return (
     <CalculatorShell
+      validationError={validationError}
       title="Buyer Affordability Desk"
       subtitle="Assess safe purchasing power, down-payment parameters, and debt-to-income buffers."
       category="Buyer Planning"

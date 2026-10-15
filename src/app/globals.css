@@ -47,7 +47,7 @@ h4, h5, h6, label, button, form, input, select, textarea {
   font-family: var(--font-display), serif;
   font-size: 5rem; /* 80px */
   line-height: 1.0;
-  color: #10291f;
+  color: inherit;
 }
 
 @media (max-width: 768px) {

@@ -155,7 +155,7 @@ export const ProjectComparisonTable = ({ projects, developers, onRemove }: Proje
                     View Details
                   </button>
                 </Link>
-                <Link href={`/project-enquiry?project=${p.slug}&interestType=project_comparison`} className="block">
+                <Link href={`/project-enquiry?project=${p.slug}&interestType=project_comparison&ids=${encodeURIComponent(projects.map(project => project.id).join(","))}`} className="block">
                   <button className="w-full py-2 border border-gold-elegant text-[#10291f] hover:bg-slate-50 text-[10px] font-bold rounded transition-colors">
                     Request Comparison Review
                   </button>

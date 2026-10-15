@@ -23,35 +23,29 @@ export default function LeadDetailPage() {
   const [activities, setActivities] = useState<LeadActivity[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Task inline state
-  const [tasks, setTasks] = useState([
-    { id: "t-1", title: "Trace 30-Year Mother Deeds", due: "2026-06-30", status: "open" },
-    { id: "t-2", title: "Verify BDA Layout Plan", due: "2026-07-05", status: "open" }
-  ]);
-
-  // Checklist inline state
-  const [checklist, setChecklist] = useState([
-    { name: "Mother Deed / Succession search", status: "cleared" },
-    { name: "Encumbrance Certificate (30 Years)", status: "under_review" },
-    { name: "Zoning / Land Conversion Order", status: "requested" },
-    { name: "RERA Registration status", status: "not_started" }
-  ]);
-
+  const [loadError, setLoadError] = useState("");
+  const tasks: { id: string; title: string; due: string; status: string }[] = [];
+  const checklist = [
+    { name: "Mother deed / succession", status: "not_started" },
+    { name: "Encumbrance certificate", status: "not_started" },
+    { name: "Land conversion", status: "not_started" },
+    { name: "RERA status", status: "not_started" },
+  ];
   useEffect(() => {
+    let cancelled = false;
     async function loadData() {
-      if (id) {
-        const leadData = await getLeadById(id);
-        const actData = await getLeadActivities(id);
-        setLead(leadData);
-        setActivities(actData);
-      }
-      setLoading(false);
+      try {
+        const [leadData, actData] = await Promise.all([getLeadById(id), getLeadActivities(id)]);
+        if (!cancelled) { setLead(leadData); setActivities(actData); }
+      } catch { if (!cancelled) setLoadError("This dossier is temporarily unavailable. Please retry."); }
+      finally { if (!cancelled) setLoading(false); }
     }
     loadData();
+    return () => { cancelled = true; };
   }, [id]);
-
   const handleAddActivity = async (notes: string, type: LeadActivity["activityType"]) => {
-    if (!lead) return;
+    if (loadError && !lead) return <p role="alert" className="p-8 text-rose-700">{loadError}</p>;
+  if (!lead) return;
 
     const result = await createLeadActivity({
       leadId: lead.id,
@@ -61,6 +55,7 @@ export default function LeadDetailPage() {
       createdBy: "Muzzamil Ahmad",
     });
 
+    if (!result.success) { setLoadError(result.error || "The activity was not saved."); return; }
     if (result.success) {
       // Reload activities
       const updatedActs = await getLeadActivities(lead.id);
@@ -68,39 +63,15 @@ export default function LeadDetailPage() {
     }
   };
 
-  const handleAddTask = (title: string, dueDate: string, priority: "low" | "normal" | "high") => {
-    setTasks([
-      ...tasks,
-      {
-        id: `t-mock-${Date.now()}`,
-        title,
-        due: dueDate || new Date().toISOString().split("T")[0],
-        status: "open"
-      }
-    ]);
-  };
-
-  const toggleChecklist = (index: number) => {
-    const nextStatusMap: Record<string, string> = {
-      not_started: "requested",
-      requested: "under_review",
-      under_review: "cleared",
-      cleared: "issue_found",
-      issue_found: "not_started"
-    };
-
-    setChecklist(
-      checklist.map((item, idx) =>
-        idx === index ? { ...item, status: nextStatusMap[item.status] || "not_started" } : item
-      )
-    );
-  };
+  const handleAddTask = () => { setLoadError("Linked task creation is not connected yet. No task was saved."); };
+  const toggleChecklist = () => { setLoadError("This checklist is unverified. Review updates require the document workflow."); };
 
   if (loading) return <div className="p-8 text-center text-slate-500 text-xs">Loading lead dossier...</div>;
   if (!lead) return <div className="p-8 text-center text-slate-500 text-xs">Client lead record not found.</div>;
 
   return (
     <div className="space-y-8">
+      {loadError && <p role="alert" className="text-sm text-rose-700">{loadError}</p>}
       {/* Back to list */}
       <div className="flex justify-between items-center">
         <Link href="/crm/leads" className="text-xs text-slate-400 hover:text-slate-600 font-semibold">

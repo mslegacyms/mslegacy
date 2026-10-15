@@ -29,12 +29,12 @@ export default function HomePage() {
               </div>
               
               <h1 className="text-hero-luxury font-bold tracking-tight leading-none text-white">
-                Preserving Capital. <br />
-                <span className="text-[#8b6e3a] italic font-normal block mt-2">Building Legacies.</span>
+                Find a property. <br />
+                <span className="text-[#8b6e3a] italic font-normal block mt-2">Plan your next step.</span>
               </h1>
               
               <p className="font-body text-base sm:text-lg text-slate-300 leading-relaxed max-w-xl font-medium">
-                Acquire, build, and manage high-value land portfolios in emerging growth corridors. Backed by 30-year mother deed legal audits, physical layout reviews, and cost-plus engineering PMC.
+                Explore property information, compare options and discuss your requirements with MS LEGACY. Confirm price, availability, approvals and documents before making a decision.
               </p>
               
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-4">
@@ -53,16 +53,16 @@ export default function HomePage() {
               {/* Trust badges */}
               <div className="grid grid-cols-3 gap-6 pt-10 border-t border-white/10 max-w-lg">
                 <div className="space-y-1">
-                  <span className="text-xl font-body font-bold text-[#8b6e3a]">100%</span>
-                  <span className="text-[10px] uppercase text-slate-400 block font-semibold tracking-wider">Title Audit Clearance</span>
+                  <span className="text-xl font-body font-bold text-[#8b6e3a]">Explore</span>
+                  <span className="text-[10px] uppercase text-slate-400 block font-semibold tracking-wider">Property information</span>
                 </div>
                 <div className="space-y-1">
-                  <span className="text-xl font-body font-bold text-[#8b6e3a]">₹300Cr+</span>
-                  <span className="text-[10px] uppercase text-slate-400 block font-semibold tracking-wider">Asset Custody Track</span>
+                  <span className="text-xl font-body font-bold text-[#8b6e3a]">Compare</span>
+                  <span className="text-[10px] uppercase text-slate-400 block font-semibold tracking-wider">Your options</span>
                 </div>
                 <div className="space-y-1">
-                  <span className="text-xl font-body font-bold text-[#8b6e3a]">0%</span>
-                  <span className="text-[10px] uppercase text-slate-400 block font-semibold tracking-wider">RERA Discrepancies</span>
+                  <span className="text-xl font-body font-bold text-[#8b6e3a]">Discuss</span>
+                  <span className="text-[10px] uppercase text-slate-400 block font-semibold tracking-wider">Your next step</span>
                 </div>
               </div>
             </div>
@@ -73,7 +73,7 @@ export default function HomePage() {
                 <div className="flex justify-between items-center pb-4 border-b border-white/10">
                   <div>
                     <h3 className="font-display text-lg font-bold text-white tracking-wide">PROPERTY WEALTH SCORE™</h3>
-                    <p className="text-[10px] text-slate-400 font-semibold tracking-wider uppercase mt-0.5">Proprietary Evaluation Index</p>
+                    <p className="text-[10px] text-slate-400 font-semibold tracking-wider uppercase mt-0.5">Illustrative planning example</p>
                   </div>
                   <Badge variant="gold" className="bg-[#8b6e3a]/20 text-[#8b6e3a] border border-gold-elegant text-xs font-body font-bold px-3">
                     9.5 / 10
@@ -114,7 +114,7 @@ export default function HomePage() {
                 </div>
 
                 <div className="bg-white/5 p-4 rounded text-xs text-slate-300 border border-gold-elegant leading-relaxed font-medium">
-                  <strong>Assessment Verdict:</strong> Sourced with verified parent deeds tracing 30 years without disputes. RERA clearance active. Physical approach roads confirm 40ft wide accessibility.
+                  <strong>Assessment Verdict:</strong> Illustrative score only. No property title, RERA status or physical access is certified by this widget. Independent document review is required.
                 </div>
               </div>
             </div>

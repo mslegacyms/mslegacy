@@ -179,35 +179,35 @@ export const DetailedConstructionCalculator = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-[10px] font-bold text-slate-400 uppercase">Plot Area (Sq.Ft)</label>
-                <input
-                  type="number"
+                <label className="block text-[10px] font-bold text-slate-400 uppercase" htmlFor="detailedconstructioncalculator-field-1">Plot Area (Sq.Ft)</label>
+                <input id="detailedconstructioncalculator-field-1"
+                  type="number" min="0"
                   value={plotSize}
                   onChange={(e) => setPlotSize(Number(e.target.value))}
                   className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 font-bold text-slate-700 focus:outline-none"
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-[10px] font-bold text-slate-400 uppercase">Built-up Area (Sq.Ft)</label>
-                <input
-                  type="number"
+                <label className="block text-[10px] font-bold text-slate-400 uppercase" htmlFor="detailedconstructioncalculator-field-2">Built-up Area (Sq.Ft)</label>
+                <input id="detailedconstructioncalculator-field-2"
+                  type="number" min="0"
                   value={builtUpArea}
                   onChange={(e) => setBuiltUpArea(Number(e.target.value))}
                   className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 font-bold text-slate-700 focus:outline-none"
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-[10px] font-bold text-slate-400 uppercase">Number of Floors</label>
-                <input
-                  type="number"
+                <label className="block text-[10px] font-bold text-slate-400 uppercase" htmlFor="detailedconstructioncalculator-field-3">Number of Floors</label>
+                <input id="detailedconstructioncalculator-field-3"
+                  type="number" min="0"
                   value={floors}
                   onChange={(e) => setFloors(Number(e.target.value))}
                   className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 font-bold text-slate-700 focus:outline-none"
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-[10px] font-bold text-slate-400 uppercase">Basement Structure</label>
-                <select
+                <label className="block text-[10px] font-bold text-slate-400 uppercase" htmlFor="detailedconstructioncalculator-field-4">Basement Structure</label>
+                <select id="detailedconstructioncalculator-field-4"
                   value={hasBasement ? "yes" : "no"}
                   onChange={(e) => setHasBasement(e.target.value === "yes")}
                   className="w-full bg-white border border-slate-200 rounded px-3 py-2 font-bold text-slate-700 focus:outline-none"
@@ -217,8 +217,8 @@ export const DetailedConstructionCalculator = () => {
                 </select>
               </div>
               <div className="space-y-1.5 sm:col-span-2">
-                <label className="block text-[10px] font-bold text-slate-400 uppercase">Terrace Finish Tier</label>
-                <select
+                <label className="block text-[10px] font-bold text-slate-400 uppercase" htmlFor="detailedconstructioncalculator-field-5">Terrace Finish Tier</label>
+                <select id="detailedconstructioncalculator-field-5"
                   value={terraceFeature}
                   onChange={(e) => setTerraceFeature(e.target.value)}
                   className="w-full bg-white border border-slate-200 rounded px-3 py-2 font-bold text-slate-700 focus:outline-none"
@@ -253,9 +253,9 @@ export const DetailedConstructionCalculator = () => {
             {showAdvanced && (
               <div className="space-y-4 pt-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase">Civil construction rate (₹/Sq.Ft)</label>
-                  <input
-                    type="number"
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase" htmlFor="detailedconstructioncalculator-field-6">Civil construction rate (₹/Sq.Ft)</label>
+                  <input id="detailedconstructioncalculator-field-6"
+                    type="number" min="0"
                     value={civilRate}
                     onChange={(e) => setCivilRate(Number(e.target.value))}
                     className="w-full bg-slate-50 border border-slate-200 rounded px-3 py-2 text-slate-700 focus:outline-none"
@@ -263,9 +263,9 @@ export const DetailedConstructionCalculator = () => {
                   <span className="text-[9px] text-slate-400 block italic">Editable planning assumption</span>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase">MEP services rate (₹/Sq.Ft)</label>
-                  <input
-                    type="number"
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase" htmlFor="detailedconstructioncalculator-field-7">MEP services rate (₹/Sq.Ft)</label>
+                  <input id="detailedconstructioncalculator-field-7"
+                    type="number" min="0"
                     value={mepRate}
                     onChange={(e) => setMepRate(Number(e.target.value))}
                     className="w-full bg-slate-50 border border-slate-200 rounded px-3 py-2 text-slate-700 focus:outline-none"
@@ -273,9 +273,9 @@ export const DetailedConstructionCalculator = () => {
                   <span className="text-[9px] text-slate-400 block italic">Editable planning assumption</span>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase">Interior woodworks rate (₹/Sq.Ft)</label>
-                  <input
-                    type="number"
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase" htmlFor="detailedconstructioncalculator-field-8">Interior woodworks rate (₹/Sq.Ft)</label>
+                  <input id="detailedconstructioncalculator-field-8"
+                    type="number" min="0"
                     value={interiorRate}
                     onChange={(e) => setInteriorRate(Number(e.target.value))}
                     className="w-full bg-slate-50 border border-slate-200 rounded px-3 py-2 text-slate-700 focus:outline-none"
@@ -283,9 +283,9 @@ export const DetailedConstructionCalculator = () => {
                   <span className="text-[9px] text-slate-400 block italic">Editable planning assumption</span>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase">Site development rate (₹/Plot Sq.Ft)</label>
-                  <input
-                    type="number"
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase" htmlFor="detailedconstructioncalculator-field-9">Site development rate (₹/Plot Sq.Ft)</label>
+                  <input id="detailedconstructioncalculator-field-9"
+                    type="number" min="0"
                     value={siteDevRate}
                     onChange={(e) => setSiteDevRate(Number(e.target.value))}
                     className="w-full bg-slate-50 border border-slate-200 rounded px-3 py-2 text-slate-700 focus:outline-none"
@@ -293,18 +293,18 @@ export const DetailedConstructionCalculator = () => {
                   <span className="text-[9px] text-slate-400 block italic">Editable planning assumption</span>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase">PMC & Design Fee (%)</label>
-                  <input
-                    type="number"
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase" htmlFor="detailedconstructioncalculator-field-10">PMC & Design Fee (%)</label>
+                  <input id="detailedconstructioncalculator-field-10"
+                    type="number" min="0"
                     value={professionalPercent}
                     onChange={(e) => setProfessionalPercent(Number(e.target.value))}
                     className="w-full bg-slate-50 border border-slate-200 rounded px-3 py-2 text-slate-700 focus:outline-none"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase">Contingency allocation (%)</label>
-                  <input
-                    type="number"
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase" htmlFor="detailedconstructioncalculator-field-11">Contingency allocation (%)</label>
+                  <input id="detailedconstructioncalculator-field-11"
+                    type="number" min="0"
                     value={contingencyPercent}
                     onChange={(e) => setContingencyPercent(Number(e.target.value))}
                     className="w-full bg-slate-50 border border-slate-200 rounded px-3 py-2 text-slate-700 focus:outline-none"

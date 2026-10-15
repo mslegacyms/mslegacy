@@ -132,8 +132,8 @@ export const CalculatorActionBar = ({ calculatorName, summaryMarkdown, onCopy, o
             ) : (
               <form onSubmit={handleLeadSubmit} className="space-y-4 text-xs font-sans text-left">
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Full Name</label>
-                  <input
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="calculatoractionbar-field-1">Full Name</label>
+                  <input id="calculatoractionbar-field-1"
                     type="text"
                     required
                     value={leadForm.fullName}
@@ -144,8 +144,8 @@ export const CalculatorActionBar = ({ calculatorName, summaryMarkdown, onCopy, o
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Phone Number</label>
-                  <input
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="calculatoractionbar-field-2">Phone Number</label>
+                  <input id="calculatoractionbar-field-2"
                     type="tel"
                     required
                     value={leadForm.phone}
@@ -156,8 +156,8 @@ export const CalculatorActionBar = ({ calculatorName, summaryMarkdown, onCopy, o
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Email Address</label>
-                  <input
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="calculatoractionbar-field-3">Email Address</label>
+                  <input id="calculatoractionbar-field-3"
                     type="email"
                     required
                     value={leadForm.email}

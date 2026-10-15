@@ -83,8 +83,8 @@ export default function ChannelPartnersPage() {
                 )}
 
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Broker Name</label>
-                  <input
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5" htmlFor="page-field-1">Broker Name</label>
+                  <input id="page-field-1"
                     type="text"
                     required
                     value={formData.name}
@@ -95,8 +95,8 @@ export default function ChannelPartnersPage() {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Agency / Company Name</label>
-                  <input
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5" htmlFor="page-field-2">Agency / Company Name</label>
+                  <input id="page-field-2"
                     type="text"
                     required
                     value={formData.company}
@@ -108,8 +108,8 @@ export default function ChannelPartnersPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Phone Number</label>
-                    <input
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5" htmlFor="page-field-3">Phone Number</label>
+                    <input id="page-field-3"
                       type="tel"
                       required
                       value={formData.phone}
@@ -120,8 +120,8 @@ export default function ChannelPartnersPage() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Email Address</label>
-                    <input
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5" htmlFor="page-field-4">Email Address</label>
+                    <input id="page-field-4"
                       type="email"
                       required
                       value={formData.email}
@@ -133,8 +133,8 @@ export default function ChannelPartnersPage() {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">RERA Registration ID (Mandatory)</label>
-                  <input
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5" htmlFor="page-field-5">RERA Registration ID (Mandatory)</label>
+                  <input id="page-field-5"
                     type="text"
                     required
                     value={formData.reraId}

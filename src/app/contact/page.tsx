@@ -1,5 +1,6 @@
 "use client";
 
+import { businessContact } from "@/lib/company/contact";
 import React, { useState } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
@@ -91,7 +92,7 @@ export default function ContactPage() {
               <div className="space-y-4">
                 <h3 className="font-serif text-2xl font-bold text-[#10291f]">Advisory Offices</h3>
                 <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-medium">
-                  MS Legacy Group operates a private corporate advisory layout in Bangalore, Karnataka. Consultations are arranged strictly by appointment.
+                  {businessContact.address}. Please contact us to arrange an appointment.
                 </p>
               </div>
 
@@ -100,7 +101,7 @@ export default function ContactPage() {
                   <Phone size={18} className="text-[#8b6e3a] mt-0.5" />
                   <div>
                     <span className="font-bold block text-[#10291f]">Phone Advisory</span>
-                    <span className="font-semibold">+91 (80) 4567-8900</span>
+                    <a className="font-semibold" href="tel:+919035687671">{businessContact.phone}</a>
                   </div>
                 </div>
 
@@ -108,14 +109,14 @@ export default function ContactPage() {
                   <Mail size={18} className="text-[#8b6e3a] mt-0.5" />
                   <div>
                     <span className="font-bold block text-[#10291f]">Advisory Desk</span>
-                    <span className="font-semibold">advisory@mslegacy.in</span>
+                    <a className="font-semibold" href="mailto:mslegacyms@gmail.com">{businessContact.email}</a>
                   </div>
                 </div>
               </div>
 
               <div className="bg-slate-50 border border-gold-elegant p-4 rounded text-xs text-slate-500 leading-relaxed font-medium">
                 <span className="font-bold text-[#10291f] block mb-1">Corporate Non-Disclosure:</span>
-                All advisory client details and property portfolio requests are managed under standard corporate non-disclosure protocols.
+                Use this form for an initial enquiry. Please do not send identity documents, banking details or confidential deeds through a public message.
               </div>
 
               {/* Requirements Exchange CTA */}
@@ -147,8 +148,8 @@ export default function ContactPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                       {/* Name */}
                       <div>
-                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Full Name</label>
-                        <input
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5" htmlFor="page-field-1">Full Name</label>
+                        <input id="page-field-1"
                           type="text"
                           required
                           value={formData.name}
@@ -160,8 +161,8 @@ export default function ContactPage() {
                       
                       {/* Phone */}
                       <div>
-                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Phone Number</label>
-                        <input
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5" htmlFor="page-field-2">Phone Number</label>
+                        <input id="page-field-2"
                           type="tel"
                           required
                           value={formData.phone}
@@ -175,8 +176,8 @@ export default function ContactPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                       {/* Email */}
                       <div>
-                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Email Address</label>
-                        <input
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5" htmlFor="page-field-3">Email Address</label>
+                        <input id="page-field-3"
                           type="email"
                           required
                           value={formData.email}
@@ -188,8 +189,8 @@ export default function ContactPage() {
                       
                       {/* City/Country */}
                       <div>
-                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">City / Country of Residence</label>
-                        <input
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5" htmlFor="page-field-4">City / Country of Residence</label>
+                        <input id="page-field-4"
                           type="text"
                           required
                           value={formData.location}
@@ -203,8 +204,8 @@ export default function ContactPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                       {/* Interest Type */}
                       <div>
-                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Primary Interest</label>
-                        <select
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5" htmlFor="page-field-5">Primary Interest</label>
+                        <select id="page-field-5"
                           value={formData.interestType}
                           onChange={(e) => setFormData({ ...formData, interestType: e.target.value })}
                           className="w-full text-xs font-semibold bg-white border border-slate-200 rounded px-3 py-2 text-[#10291f] focus:outline-none focus:ring-2 focus:ring-[#8b6e3a]/30"
@@ -217,8 +218,8 @@ export default function ContactPage() {
 
                       {/* Buyer Type */}
                       <div>
-                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Profile Type</label>
-                        <select
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5" htmlFor="page-field-6">Profile Type</label>
+                        <select id="page-field-6"
                           value={formData.buyerType}
                           onChange={(e) => setFormData({ ...formData, buyerType: e.target.value })}
                           className="w-full text-xs font-semibold bg-white border border-slate-200 rounded px-3 py-2 text-[#10291f] focus:outline-none focus:ring-2 focus:ring-[#8b6e3a]/30"
@@ -231,8 +232,8 @@ export default function ContactPage() {
 
                       {/* Budget Range */}
                       <div>
-                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Budget Allocation</label>
-                        <select
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5" htmlFor="page-field-7">Budget Allocation</label>
+                        <select id="page-field-7"
                           value={formData.budgetRange}
                           onChange={(e) => setFormData({ ...formData, budgetRange: e.target.value })}
                           className="w-full text-xs font-semibold bg-white border border-slate-200 rounded px-3 py-2 text-[#10291f] focus:outline-none focus:ring-2 focus:ring-[#8b6e3a]/30"
@@ -246,8 +247,8 @@ export default function ContactPage() {
 
                     {/* Message */}
                     <div>
-                      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5">Message / Requirements Description</label>
-                      <textarea
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5" htmlFor="page-field-8">Message / Requirements Description</label>
+                      <textarea id="page-field-8"
                         rows={4}
                         value={formData.message}
                         onChange={(e) => setFormData({ ...formData, message: e.target.value })}

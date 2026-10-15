@@ -22,6 +22,10 @@ export interface UserProfile {
 /**
  * Checks if a role is authorized to access the main CRM dashboard.
  */
+export function isUserRole(value: unknown): value is UserRole {
+  return typeof value === "string" && ["founder", "admin", "sales", "legal", "property_manager", "channel_partner", "client"].includes(value);
+}
+
 export function isCrmUser(role: UserRole): boolean {
   return ["founder", "admin", "sales", "legal", "property_manager"].includes(role);
 }
