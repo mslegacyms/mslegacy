@@ -1,168 +1,58 @@
 "use server";
-
 import { createClient } from "@/lib/supabase/server";
-import { mockLeads } from "@/lib/data/mockLeads";
+import { getCurrentUserProfile } from "@/lib/auth/getCurrentUserProfile";
 import { type Lead } from "@/lib/types/crm";
-import { logAuditAction } from "./audit";
-
-const isSupabaseConfigured = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
-
-/**
- * Retrieves the list of leads.
- * Falls back to mock data if Supabase keys are missing.
- */
+import { isUuid, text, code } from "@/lib/validation/intake";
+const statuses = ["new", "contacted", "qualified", "documentation_review", "site_visit_planned", "proposal_sent", "negotiation", "converted", "lost", "archived"];
+const priorities = ["low", "normal", "high", "urgent"];
+const fields = "id, full_name, phone, email, city_country, interest_type, buyer_type, budget_range, message, lead_source, status, priority, assigned_to, created_at";
+async function staff(write = false) {
+  const profile = await getCurrentUserProfile();
+  if (!profile || !(write ? ["founder", "admin", "sales"] : ["founder", "admin", "sales", "legal"]).includes(profile.role)) throw new Error("This lead operation is unavailable for your account.");
+  return profile;
+}
+function mapLead(value: unknown): Lead {
+  if (!value || typeof value !== "object") throw new Error("Invalid lead record.");
+  const row = value as Record<string, unknown>;
+  if (typeof row.id !== "string" || typeof row.full_name !== "string" || !statuses.includes(String(row.status)) || !priorities.includes(String(row.priority))) throw new Error("Invalid lead record.");
+  const nullable = (v: unknown) => typeof v === "string" ? v : null;
+  return { id: row.id, fullName: row.full_name, phone: nullable(row.phone), email: nullable(row.email), cityCountry: nullable(row.city_country),
+    interestType: String(row.interest_type ?? ""), buyerType: String(row.buyer_type ?? ""), budgetRange: String(row.budget_range ?? ""), message: nullable(row.message),
+    leadSource: String(row.lead_source ?? ""), status: row.status as Lead["status"], priority: row.priority as Lead["priority"],
+    assignedToName: row.assigned_to ? "Assigned representative" : "Unassigned", createdDate: String(row.created_at ?? "") };
+}
 export async function getLeads(): Promise<Lead[]> {
-  if (!isSupabaseConfigured) {
-    return mockLeads;
-  }
-
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("leads")
-      .select("id, full_name, phone, email, city_country, interest_type, buyer_type, budget_range, message, lead_source, status, priority, assigned_to, created_at")
-      .order("created_at", { ascending: false });
-
-    if (error || !data) {
-      console.error("Supabase fetch leads error:", error?.message);
-      return mockLeads;
-    }
-
-    return data.map((item) => ({
-      id: item.id,
-      fullName: item.full_name,
-      phone: item.phone,
-      email: item.email,
-      cityCountry: item.city_country,
-      interestType: item.interest_type,
-      buyerType: item.buyer_type,
-      budgetRange: item.budget_range,
-      message: item.message,
-      leadSource: item.lead_source,
-      status: item.status as any,
-      priority: item.priority as any,
-      assignedToName: item.assigned_to ? "Assigned Representative" : "Unassigned",
-      createdDate: item.created_at,
-    }));
-  } catch (err) {
-    console.error("Leads data service exception:", err);
-    return mockLeads;
-  }
+  await staff(); const supabase = await createClient();
+  const { data, error } = await supabase.from("leads").select(fields).order("created_at", { ascending: false });
+  if (error) throw new Error("The lead queue could not be loaded. Please retry.");
+  return (data ?? []).map(mapLead);
 }
-
-/**
- * Retrieves a lead by ID.
- */
 export async function getLeadById(id: string): Promise<Lead | null> {
-  if (!isSupabaseConfigured) {
-    return mockLeads.find((lead) => lead.id === id) || null;
-  }
-
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("leads")
-      .select("id, full_name, phone, email, city_country, interest_type, buyer_type, budget_range, message, lead_source, status, priority, assigned_to, created_at")
-      .eq("id", id)
-      .single();
-
-    if (error || !data) {
-      console.error("Supabase fetch lead by id error:", error?.message);
-      return mockLeads.find((lead) => lead.id === id) || null;
-    }
-
-    return {
-      id: data.id,
-      fullName: data.full_name,
-      phone: data.phone,
-      email: data.email,
-      cityCountry: data.city_country,
-      interestType: data.interest_type,
-      buyerType: data.buyer_type,
-      budgetRange: data.budget_range,
-      message: data.message,
-      leadSource: data.lead_source,
-      status: data.status as any,
-      priority: data.priority as any,
-      assignedToName: data.assigned_to ? "Assigned Representative" : "Unassigned",
-      createdDate: data.created_at,
-    };
-  } catch (err) {
-    console.error("Leads data service fetch exception:", err);
-    return mockLeads.find((lead) => lead.id === id) || null;
-  }
+  await staff(); if (!isUuid(id)) return null;
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("leads").select(fields).eq("id", id).maybeSingle();
+  if (error) throw new Error("The lead could not be loaded.");
+  return data ? mapLead(data) : null;
 }
-
-/**
- * Inserts a new lead.
- */
-export async function createLead(leadData: Omit<Lead, "id" | "createdDate">): Promise<{ success: boolean; data?: any; error?: string }> {
-  if (!isSupabaseConfigured) {
-    const newLead: Lead = {
-      ...leadData,
-      id: `lead-mock-${Date.now()}`,
-      createdDate: new Date().toISOString(),
-    };
-    mockLeads.unshift(newLead);
-    return { success: true, data: newLead };
-  }
-
+export async function createLead(input: Omit<Lead, "id" | "createdDate">): Promise<{ success: boolean; data?: Lead; error?: string }> {
   try {
+    const profile = await staff(true);
+    const name = text(input.fullName,150), status = code(input.status), priority = code(input.priority);
+    if (name.length < 2 || !statuses.includes(status) || !priorities.includes(priority)) throw new Error("Please check the lead details.");
     const supabase = await createClient();
-    const { data, error } = await supabase.from("leads").insert([
-      {
-        full_name: leadData.fullName,
-        phone: leadData.phone,
-        email: leadData.email,
-        city_country: leadData.cityCountry,
-        interest_type: leadData.interestType,
-        buyer_type: leadData.buyerType,
-        budget_range: leadData.budgetRange,
-        message: leadData.message,
-        lead_source: leadData.leadSource || "crm_manual",
-        status: leadData.status || "new",
-        priority: leadData.priority || "normal",
-      }
-    ]).select().single();
-
-    if (error) {
-      return { success: false, error: error.message };
-    }
-
-    await logAuditAction("lead_created", "lead", data.id, { fullName: leadData.fullName });
-
-    return { success: true, data };
-  } catch (err: any) {
-    return { success: false, error: err.message || "An unexpected error occurred." };
-  }
+    const { data, error } = await supabase.from("leads").insert({ full_name: name, phone: text(input.phone ?? "",30), email: text(input.email ?? "",254),
+      city_country: text(input.cityCountry ?? "",200), interest_type: code(input.interestType), buyer_type: code(input.buyerType), budget_range: text(input.budgetRange, 80),
+      message: text(input.message ?? "",8000), lead_source: "crm_manual", status, priority, created_by: profile.id }).select(fields).single();
+    if (error || !data) return { success: false, error: "The lead could not be saved. Please retry." };
+    return { success: true, data: mapLead(data) };
+  } catch (error) { return { success: false, error: error instanceof Error ? error.message : "The lead could not be saved." }; }
 }
-
-/**
- * Updates a lead status.
- */
 export async function updateLeadStatus(id: string, status: string): Promise<{ success: boolean; error?: string }> {
-  if (!isSupabaseConfigured) {
-    const lead = mockLeads.find((l) => l.id === id);
-    if (lead) {
-      lead.status = status as any;
-      return { success: true };
-    }
-    return { success: false, error: "Lead not found in memory." };
-  }
-
   try {
+    await staff(true);
+    if (!isUuid(id) || !statuses.includes(status)) return { success: false, error: "Invalid lead or status." };
     const supabase = await createClient();
-    const { error } = await supabase
-      .from("leads")
-      .update({ status })
-      .eq("id", id);
-
-    if (error) return { success: false, error: error.message };
-
-    await logAuditAction("lead_status_updated", "lead", id, { status });
-
-    return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message || "An unexpected error occurred." };
-  }
+    const { data, error } = await supabase.from("leads").update({ status }).eq("id", id).select("id").maybeSingle();
+    return error || !data ? { success: false, error: "The status was not saved. Check your access and retry." } : { success: true };
+  } catch { return { success: false, error: "The status was not saved. Please retry." }; }
 }

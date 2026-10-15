@@ -106,20 +106,19 @@ export const LayoutDevelopmentCalculator = () => {
   const [unsoldInventoryPercent, setUnsoldInventoryPercent] = useState(10);
   const [escalationAssumptionPercent, setEscalationAssumptionPercent] = useState(4);
 
-  const [crmSynced, setCrmSynced] = useState(false);
 
   // 7. Checklist state
   const [checklistItems, setChecklistItems] = useState([
-    { id: "mother_deed", name: "Mother deed / 30-year trace", status: "Verified" },
-    { id: "rtc", name: "RTC/Pahani", status: "Verified" },
+    { id: "mother_deed", name: "Mother deed / 30-year trace", status: "Pending" },
+    { id: "rtc", name: "RTC/Pahani", status: "Pending" },
     { id: "mutation", name: "Mutation/MR", status: "Pending" },
-    { id: "ec", name: "Encumbrance Certificate (EC)", status: "Verified" },
-    { id: "tax_receipt", name: "Tax paid receipt", status: "Verified" },
+    { id: "ec", name: "Encumbrance Certificate (EC)", status: "Pending" },
+    { id: "tax_receipt", name: "Tax paid receipt", status: "Pending" },
     { id: "survey_sketch", name: "Survey sketch (Mojini 11E)", status: "Pending" },
-    { id: "village_map", name: "Village map", status: "Verified" },
+    { id: "village_map", name: "Village map", status: "Pending" },
     { id: "conversion_order", name: "DC conversion order", status: "Pending" },
     { id: "zoning_confirmation", name: "Zoning confirmation", status: "Pending" },
-    { id: "approach_road", name: "Approach road proof", status: "Verified" },
+    { id: "approach_road", name: "Approach road proof", status: "Pending" },
     { id: "layout_plan", name: "Layout plan", status: "Pending" },
     { id: "allocation_statement", name: "Road/park/CA allocation statement", status: "Pending" },
     { id: "local_approval", name: "Local planning approval", status: "Pending" },
@@ -197,7 +196,7 @@ export const LayoutDevelopmentCalculator = () => {
     if (!plot.enabled) return { ...plot, count: 0, areaConsumed: 0 };
     const plotSize = plot.width * plot.depth;
     const allocatedArea = saleableSqft * (plot.mixPercent / 100);
-    const count = Math.floor(allocatedArea / plotSize);
+    const count = plotSize > 0 ? Math.floor(allocatedArea / plotSize) : 0;
     return {
       ...plot,
       count,
@@ -221,7 +220,7 @@ export const LayoutDevelopmentCalculator = () => {
   const totalLandAcquisitionCost = landCost + stampDutyCost + legalFees + brokerageCost + holdingCostLumpSum;
 
   const conversionCost = conversionRequired === "yes" ? landAcres * conversionCostPerAcre : 0;
-  const approvalFees = landAcres * layoutApprovalFeePerAcre + totalSqft * (bettermentChargePerSqft / 10);
+  const approvalFees = landAcres * layoutApprovalFeePerAcre + totalSqft * bettermentChargePerSqft;
   const totalApprovalsAndDocs = Math.round(conversionCost + approvalFees + scrutinyFeeEstimate + reraRegistrationCostEstimate + khataEstimate + liaisonCost);
 
   const roadCostVal = roadSqft * roadRate;
@@ -230,10 +229,10 @@ export const LayoutDevelopmentCalculator = () => {
   const totalInfrastructure = Math.round(roadCostVal + drainCostVal + utilityLinesCost + securityRate + amenityLumpSum + signageLumpSum);
 
   // Revenue GDVs
-  const grossTargetGDV = saleableSqft * sellRatePerSqft;
-  const gdvConservativeVal = saleableSqft * conservativePricePerSqft;
-  const gdvBaseVal = saleableSqft * basePricePerSqft;
-  const gdvPremiumVal = saleableSqft * premiumPricePerSqft;
+  const grossTargetGDV = totalAreaConsumed * sellRatePerSqft;
+  const gdvConservativeVal = totalAreaConsumed * conservativePricePerSqft;
+  const gdvBaseVal = totalAreaConsumed * basePricePerSqft;
+  const gdvPremiumVal = totalAreaConsumed * premiumPricePerSqft;
 
   const cpCommission = grossTargetGDV * (channelPartnerCommissionPercent / 100);
   const totalLaunchAndMarketing = marketingBudget + salesOfficeLumpSum + launchEventLumpSum + cpCommission + brochureCostLumpSum;
@@ -247,7 +246,7 @@ export const LayoutDevelopmentCalculator = () => {
   const discountVal = grossTargetGDV * (discountProvisionPercent / 100);
   const netRevenueAfterDiscount = grossTargetGDV - discountVal;
 
-  const breakEvenRate = Math.round(totalProjectCostTillLaunch / saleableSqft);
+  const breakEvenRate = saleableSqft > 0 ? Math.round(totalProjectCostTillLaunch / saleableSqft) : 0;
   const launchViabilityScore = Math.max(10, Math.min(100, Math.round((grossTargetGDV / totalProjectCostTillLaunch) * 35)));
 
   // Calculate Overall Readiness & Feasibility Grade
@@ -317,7 +316,7 @@ export const LayoutDevelopmentCalculator = () => {
       `Estimated project cost till launch: ${formatINR(totalProjectCostTillLaunch)}\n` +
       `Break-even selling price: ${formatINR(breakEvenRate)} per Sq.Ft\n` +
       `Estimated GDV: ${formatINR(grossTargetGDV)}\n` +
-      `Launch viability score: ${overallReadinessScore}/100`;
+      `Illustrative checklist score: ${overallReadinessScore}/100`;
     navigator.clipboard.writeText(text);
     alert("Feasibility summary copied to clipboard!");
   };
@@ -327,12 +326,12 @@ export const LayoutDevelopmentCalculator = () => {
   };
 
   const handleCrmSync = () => {
-    setCrmSynced(true);
-    alert("Lead feasibility calculations queued under CRM Intake Desk!");
+    window.location.assign("/contact?interestType=layout_feasibility_review");
   };
 
   return (
     <div className="space-y-8 font-sans text-xs text-[#1f2a24]">
+      <p role="status" className="max-w-6xl mx-auto p-4 bg-amber-50 text-amber-900 text-sm">Illustrative area and cost model. Authority defaults are editable assumptions. Plot geometry, setbacks, height, parking and approval eligibility require a coordinated architect review. Financing is excluded from these totals.</p>
       
       {/* Warnings & Validations */}
       {totalAllocPercent > 100 && (
@@ -368,7 +367,7 @@ export const LayoutDevelopmentCalculator = () => {
                 </label>
                 <div className="flex space-x-2">
                   <input
-                    type="number"
+                    type="number" min="0"
                     value={landSize}
                     onChange={(e) => setLandSize(Math.max(1, Number(e.target.value)))}
                     className="w-2/3 bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 font-bold text-[#1f2a24] focus:outline-none"
@@ -388,8 +387,8 @@ export const LayoutDevelopmentCalculator = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-[10px] font-bold text-[#5f6b63] uppercase">Title & Ownership status</label>
-                <select
+                <label className="block text-[10px] font-bold text-[#5f6b63] uppercase" htmlFor="layoutdevelopmentcalculator-field-1">Title & Ownership status</label>
+                <select id="layoutdevelopmentcalculator-field-1"
                   value={titleStatus}
                   onChange={(e) => setTitleStatus(e.target.value)}
                   className="w-full bg-white border border-slate-200 rounded px-3 py-2 font-bold text-[#1f2a24] focus:outline-none"
@@ -401,8 +400,8 @@ export const LayoutDevelopmentCalculator = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-[10px] font-bold text-[#5f6b63] uppercase">Approach Road Type</label>
-                <select
+                <label className="block text-[10px] font-bold text-[#5f6b63] uppercase" htmlFor="layoutdevelopmentcalculator-field-2">Approach Road Type</label>
+                <select id="layoutdevelopmentcalculator-field-2"
                   value={roadType}
                   onChange={(e) => setRoadType(e.target.value)}
                   className="w-full bg-white border border-slate-200 rounded px-3 py-2 font-bold text-[#1f2a24] focus:outline-none"
@@ -414,8 +413,8 @@ export const LayoutDevelopmentCalculator = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-[10px] font-bold text-[#5f6b63] uppercase">Approval Authority Profile</label>
-                <select
+                <label className="block text-[10px] font-bold text-[#5f6b63] uppercase" htmlFor="layoutdevelopmentcalculator-field-3">Approval Authority Profile</label>
+                <select id="layoutdevelopmentcalculator-field-3"
                   value={selectedAuthority}
                   onChange={(e) => setSelectedAuthority(e.target.value)}
                   className="w-full bg-white border border-slate-200 rounded px-3 py-2 font-bold text-[#8b6e3a] focus:outline-none"
@@ -460,7 +459,7 @@ export const LayoutDevelopmentCalculator = () => {
                   <td className="py-2.5 px-3">Roads / Circulation %</td>
                   <td className="py-2.5 px-3">
                     <input
-                      type="number"
+                      type="number" min="0"
                       value={roadAlloc}
                       onChange={(e) => { setRoadAlloc(Number(e.target.value)); setIsCustomEdited(true); }}
                       className="w-16 border rounded px-1.5 py-0.5 font-bold text-[#1f2a24]"
@@ -474,7 +473,7 @@ export const LayoutDevelopmentCalculator = () => {
                   <td className="py-2.5 px-3">Parks / Open space %</td>
                   <td className="py-2.5 px-3">
                     <input
-                      type="number"
+                      type="number" min="0"
                       value={parkAlloc}
                       onChange={(e) => { setParkAlloc(Number(e.target.value)); setIsCustomEdited(true); }}
                       className="w-16 border rounded px-1.5 py-0.5 font-bold text-[#1f2a24]"
@@ -488,7 +487,7 @@ export const LayoutDevelopmentCalculator = () => {
                   <td className="py-2.5 px-3">Civic Amenities / CA %</td>
                   <td className="py-2.5 px-3">
                     <input
-                      type="number"
+                      type="number" min="0"
                       value={caAlloc}
                       onChange={(e) => { setCaAlloc(Number(e.target.value)); setIsCustomEdited(true); }}
                       className="w-16 border rounded px-1.5 py-0.5 font-bold text-[#1f2a24]"
@@ -502,7 +501,7 @@ export const LayoutDevelopmentCalculator = () => {
                   <td className="py-2.5 px-3">Utilities / Services %</td>
                   <td className="py-2.5 px-3">
                     <input
-                      type="number"
+                      type="number" min="0"
                       value={utilityAlloc}
                       onChange={(e) => { setUtilityAlloc(Number(e.target.value)); setIsCustomEdited(true); }}
                       className="w-16 border rounded px-1.5 py-0.5 font-bold text-[#1f2a24]"
@@ -516,7 +515,7 @@ export const LayoutDevelopmentCalculator = () => {
                   <td className="py-2.5 px-3">Drainage / Buffers %</td>
                   <td className="py-2.5 px-3">
                     <input
-                      type="number"
+                      type="number" min="0"
                       value={bufferAlloc}
                       onChange={(e) => { setBufferAlloc(Number(e.target.value)); setIsCustomEdited(true); }}
                       className="w-16 border rounded px-1.5 py-0.5 font-bold text-[#1f2a24]"
@@ -530,7 +529,7 @@ export const LayoutDevelopmentCalculator = () => {
                   <td className="py-2.5 px-3">Reserved / Shape Loss %</td>
                   <td className="py-2.5 px-3">
                     <input
-                      type="number"
+                      type="number" min="0"
                       value={reservedAlloc}
                       onChange={(e) => { setReservedAlloc(Number(e.target.value)); setIsCustomEdited(true); }}
                       className="w-16 border rounded px-1.5 py-0.5 font-bold text-[#1f2a24]"
@@ -581,7 +580,7 @@ export const LayoutDevelopmentCalculator = () => {
                   <div className="flex items-center space-x-1.5">
                     <span className="text-[10px] text-[#5f6b63]">W:</span>
                     <input
-                      type="number"
+                      type="number" min="0"
                       value={plot.width}
                       disabled={!plot.enabled}
                       onChange={(e) => handlePlotTypeChange(plot.id, "width", Number(e.target.value))}
@@ -591,7 +590,7 @@ export const LayoutDevelopmentCalculator = () => {
                   <div className="flex items-center space-x-1.5">
                     <span className="text-[10px] text-[#5f6b63]">D:</span>
                     <input
-                      type="number"
+                      type="number" min="0"
                       value={plot.depth}
                       disabled={!plot.enabled}
                       onChange={(e) => handlePlotTypeChange(plot.id, "depth", Number(e.target.value))}
@@ -601,7 +600,7 @@ export const LayoutDevelopmentCalculator = () => {
                   <div className="flex items-center space-x-1.5">
                     <span className="text-[10px] text-[#5f6b63]">Mix%:</span>
                     <input
-                      type="number"
+                      type="number" min="0"
                       value={plot.mixPercent}
                       disabled={!plot.enabled}
                       onChange={(e) => handlePlotTypeChange(plot.id, "mixPercent", Number(e.target.value))}
@@ -646,7 +645,7 @@ export const LayoutDevelopmentCalculator = () => {
                 <div className="space-y-1">
                   <span className="font-bold text-[#5f6b63]">Rate per Acre (₹):</span>
                   <input
-                    type="number"
+                    type="number" min="0"
                     value={landAcquisitionRatePerAcre}
                     onChange={(e) => setLandAcquisitionRatePerAcre(Number(e.target.value))}
                     className="w-full border rounded p-1.5 font-bold text-[#1f2a24]"
@@ -655,7 +654,7 @@ export const LayoutDevelopmentCalculator = () => {
                 <div className="space-y-1">
                   <span className="font-bold text-[#5f6b63]">Stamp Duty / Reg (%):</span>
                   <input
-                    type="number"
+                    type="number" min="0"
                     value={stampDutyPercent}
                     onChange={(e) => setStampDutyPercent(Number(e.target.value))}
                     className="w-full border rounded p-1.5 font-bold text-[#1f2a24]"
@@ -670,7 +669,7 @@ export const LayoutDevelopmentCalculator = () => {
                 <div className="space-y-1">
                   <span className="font-bold text-[#5f6b63]">Conversion Cost (₹/Acre):</span>
                   <input
-                    type="number"
+                    type="number" min="0"
                     value={conversionCostPerAcre}
                     onChange={(e) => setConversionCostPerAcre(Number(e.target.value))}
                     className="w-full border rounded p-1.5 font-bold text-[#1f2a24]"
@@ -679,7 +678,7 @@ export const LayoutDevelopmentCalculator = () => {
                 <div className="space-y-1">
                   <span className="font-bold text-[#5f6b63]">Betterment charge (₹/sqft):</span>
                   <input
-                    type="number"
+                    type="number" min="0"
                     value={bettermentChargePerSqft}
                     onChange={(e) => setBettermentChargePerSqft(Number(e.target.value))}
                     className="w-full border rounded p-1.5 font-bold text-[#1f2a24]"
@@ -688,7 +687,7 @@ export const LayoutDevelopmentCalculator = () => {
                 <div className="space-y-1">
                   <span className="font-bold text-[#5f6b63]">RERA Registration (₹):</span>
                   <input
-                    type="number"
+                    type="number" min="0"
                     value={reraRegistrationCostEstimate}
                     onChange={(e) => setReraRegistrationCostEstimate(Number(e.target.value))}
                     className="w-full border rounded p-1.5 font-bold text-[#1f2a24]"
@@ -705,7 +704,7 @@ export const LayoutDevelopmentCalculator = () => {
               <div className="space-y-1">
                 <span className="font-bold text-[#5f6b63]">Conservative Selling Price (₹/sqft):</span>
                 <input
-                  type="number"
+                  type="number" min="0"
                   value={conservativePricePerSqft}
                   onChange={(e) => setConservativePricePerSqft(Number(e.target.value))}
                   className="w-full border rounded p-1.5 font-bold text-[#1f2a24]"
@@ -714,7 +713,7 @@ export const LayoutDevelopmentCalculator = () => {
               <div className="space-y-1">
                 <span className="font-bold text-[#5f6b63]">Base Selling Price (₹/sqft):</span>
                 <input
-                  type="number"
+                  type="number" min="0"
                   value={basePricePerSqft}
                   onChange={(e) => setBasePricePerSqft(Number(e.target.value))}
                   className="w-full border rounded p-1.5 font-bold text-[#1f2a24]"
@@ -723,7 +722,7 @@ export const LayoutDevelopmentCalculator = () => {
               <div className="space-y-1">
                 <span className="font-bold text-[#5f6b63]">Selected Target Price (₹/sqft):</span>
                 <input
-                  type="number"
+                  type="number" min="0"
                   value={sellRatePerSqft}
                   onChange={(e) => setSellRatePerSqft(Number(e.target.value))}
                   className="w-full border rounded p-1.5 font-bold text-emerald-700"
@@ -835,10 +834,10 @@ export const LayoutDevelopmentCalculator = () => {
                 <Button 
                   onClick={handleCrmSync}
                   className={`font-bold text-[9px] py-2 px-2 h-auto border-none ${
-                    crmSynced ? "bg-emerald-700 text-white" : "bg-[#8b6e3a] text-white"
+                    "bg-[#8b6e3a] text-white"
                   }`}
                 >
-                  {crmSynced ? "Saved" : "Save Lead"}
+                  Request review
                 </Button>
               </div>
               <Link href="/contact?interestType=layout_feasibility_review" className="block pt-1">

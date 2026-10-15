@@ -1,119 +1,43 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { env, isSupabaseConfigured } from "@/lib/env";
+import { isCrmUser, isUserRole } from "@/lib/auth/roles";
+import { getRedirectRouteByRole } from "@/lib/auth/redirectByRole";
 
-/**
- * Refreshes the Supabase auth session token and enforces route protection policies.
- * Supports a mock fallback mode when Supabase environment variables are missing.
- */
 export async function updateSession(request: NextRequest) {
   const path = request.nextUrl.pathname;
-  
-  // Define protected route boundaries
-  const isCrmRoute = path.startsWith("/crm");
-  const isPartnerRoute = path.startsWith("/partner");
-  const isClientRoute = path.startsWith("/client");
-  const isAuthRoute = path.startsWith("/login");
-  const isPrivateRoute = isCrmRoute || isPartnerRoute || isClientRoute;
-
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  // FALLBACK MOCK MODE: If Supabase keys are missing
-  if (!supabaseUrl || !supabaseAnonKey) {
-    const mockUserCookie = request.cookies.get("mslegacy_mock_user");
-    
-    if (isPrivateRoute && !mockUserCookie) {
-      // Redirect unauthenticated requests to login
-      const url = request.nextUrl.clone();
-      url.pathname = "/login";
-      return NextResponse.redirect(url);
+  const crm = path === "/crm" || path.startsWith("/crm/");
+  const partner = path === "/partner" || path.startsWith("/partner/");
+  const client = path === "/client" || path.startsWith("/client/");
+  const privateRoute = crm || partner || client;
+  const login = path === "/login";
+  let response = NextResponse.next({ request });
+  response.headers.set("Cache-Control", "private, no-store");
+  const redirectTo = (pathname: string) => {
+    const url = request.nextUrl.clone(); url.pathname = pathname; url.search = "";
+    const redirected = NextResponse.redirect(url);
+    for (const cookie of response.cookies.getAll()) redirected.cookies.set(cookie);
+    for (const header of ["cache-control", "expires", "pragma"]) {
+      const value = response.headers.get(header); if (value) redirected.headers.set(header, value);
     }
-    
-    if (isAuthRoute && mockUserCookie) {
-      // Redirect already logged-in mock users to their dashboards
-      const mockRole = mockUserCookie.value;
-      const url = request.nextUrl.clone();
-      
-      if (mockRole === "founder" || mockRole === "admin") {
-        url.pathname = "/crm/dashboard";
-      } else if (mockRole === "sales") {
-        url.pathname = "/crm/leads";
-      } else if (mockRole === "legal") {
-        url.pathname = "/crm/legal";
-      } else if (mockRole === "property_manager") {
-        url.pathname = "/crm/properties";
-      } else if (mockRole === "channel_partner") {
-        url.pathname = "/partner/dashboard";
-      } else {
-        url.pathname = "/client/dashboard";
-      }
-      return NextResponse.redirect(url);
-    }
-    
-    return NextResponse.next();
-  }
-
-  // STANDARD SUPABASE MODE: Credentials are present
-  let response = NextResponse.next({
-    request,
-  });
-
-  const supabase = createServerClient(
-    supabaseUrl,
-    supabaseAnonKey,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value));
-          response = NextResponse.next({
-            request,
-          });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options)
-          );
-        },
+    return redirected;
+  };
+  if (!isSupabaseConfigured()) return privateRoute ? redirectTo("/login") : response;
+  try {
+    const supabase = createServerClient(env.supabaseUrl, env.supabaseAnonKey, { cookies: {
+      getAll: () => request.cookies.getAll(),
+      setAll: (cookiesToSet) => {
+        for (const { name, value } of cookiesToSet) request.cookies.set(name, value);
+        response = NextResponse.next({ request });
+        response.headers.set("Cache-Control", "private, no-store");
+        for (const { name, value, options } of cookiesToSet) response.cookies.set(name, value, options);
       },
-    }
-  );
-
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (isPrivateRoute && !user) {
-    // Redirect unauthenticated user to login
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    return NextResponse.redirect(url);
-  }
-
-  if (isAuthRoute && user) {
-    // Fetch profile role and redirect to dashboard
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-      
-    const role = profile?.role || "client";
-    const url = request.nextUrl.clone();
-    
-    if (role === "founder" || role === "admin") {
-      url.pathname = "/crm/dashboard";
-    } else if (role === "sales") {
-      url.pathname = "/crm/leads";
-    } else if (role === "legal") {
-      url.pathname = "/crm/legal";
-    } else if (role === "property_manager") {
-      url.pathname = "/crm/properties";
-    } else if (role === "channel_partner") {
-      url.pathname = "/partner/dashboard";
-    } else {
-      url.pathname = "/client/dashboard";
-    }
-    return NextResponse.redirect(url);
-  }
-
-  return response;
+    } });
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error || !user) return privateRoute ? redirectTo("/login") : response;
+    const { data: profile, error: profileError } = await supabase.from("profiles").select("role, status").eq("id", user.id).single();
+    if (profileError || !profile || profile.status !== "active" || !isUserRole(profile.role)) return privateRoute ? redirectTo("/login") : response;
+    if (login || (crm && !isCrmUser(profile.role)) || (partner && profile.role !== "channel_partner") || (client && profile.role !== "client")) return redirectTo(getRedirectRouteByRole(profile.role));
+    return response;
+  } catch { return privateRoute ? redirectTo("/login") : response; }
 }

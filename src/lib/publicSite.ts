@@ -1,18 +1,17 @@
 import type { Metadata } from "next";
+import { businessContact } from "@/lib/company/contact";
+import { getSiteOrigin } from "@/lib/site";
 
 // Public contact master from MS LEGACY Brand Identity Standards v2.0.
 export const publicSite = {
-  name: "MS LEGACY",
-  phone: "+91 9035687671",
+  name: businessContact.brand,
+  phone: businessContact.phone,
   phoneHref: "tel:+919035687671",
-  email: "mslegacyms@gmail.com",
+  email: businessContact.email,
   emailHref: "mailto:mslegacyms@gmail.com",
   whatsapp: "https://wa.me/919035687671",
-  address:
-    "No. 901, 20th Cross, MCECHS Layout, Shivram Karanth Nagar, Bengaluru 560077",
-  url: (
-    process.env.NEXT_PUBLIC_SITE_URL || "https://mslegacy.vercel.app"
-  ).replace(/\/$/, ""),
+  address: businessContact.address,
+  url: getSiteOrigin(),
 };
 
 export function pageMetadata(

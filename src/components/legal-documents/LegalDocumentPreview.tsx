@@ -1,3 +1,4 @@
+import { DocumentText } from "./DocumentText";
 import React, { useRef, useState } from "react";
 import { LegalDocumentDraft } from "@/lib/types/legalDocuments";
 import { legalTemplatesMap } from "@/lib/legal-templates";
@@ -24,36 +25,6 @@ export default function LegalDocumentPreview({
   const template = draft.documentType ? legalTemplatesMap[draft.documentType] : null;
   const renderedContent = template ? template.renderDocument(draft) : "";
 
-  // Convert markdown-ish text to basic paragraphs and HTML
-  const formatDocumentToHTML = (text: string) => {
-    if (!text) return "";
-    return text
-      .split("\n")
-      .map((line) => {
-        const trimmed = line.trim();
-        if (trimmed.startsWith("# ")) {
-          return `<h1 class="font-serif text-xl sm:text-2xl font-extrabold text-center uppercase tracking-tight mb-8 border-b-2 border-double border-slate-900 pb-2 mt-4">${trimmed.replace("# ", "")}</h1>`;
-        }
-        if (trimmed.startsWith("### ")) {
-          return `<h3 class="font-serif text-sm font-bold uppercase tracking-wider mb-3 mt-5">${trimmed.replace("### ", "")}</h3>`;
-        }
-        if (trimmed.startsWith("#### ")) {
-          return `<h4 class="font-serif text-xs font-bold uppercase tracking-wider mb-2 mt-4 text-[#10291f]">${trimmed.replace("#### ", "")}</h4>`;
-        }
-        if (trimmed.startsWith("* ")) {
-          return `<li class="ml-6 list-disc mb-1.5 text-xs text-slate-800 leading-relaxed">${trimmed.replace("* ", "")}</li>`;
-        }
-        if (trimmed.startsWith("---")) {
-          return `<hr class="my-6 border-slate-900" />`;
-        }
-        if (trimmed === "") {
-          return `<div class="h-2"></div>`;
-        }
-        return `<p class="mb-3 text-xs text-slate-800 leading-relaxed text-justify">${trimmed}</p>`;
-      })
-      .join("");
-  };
-
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(renderedContent);
@@ -76,6 +47,7 @@ export default function LegalDocumentPreview({
 
   return (
     <div className="space-y-6">
+      <p role="status" className="text-sm text-amber-800">Local working draft only. This browser tab does not provide official review or approval.</p>
       {/* Top Action Bar */}
       {showActions && (
         <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-4 border border-slate-100 rounded shadow-xs">
@@ -142,7 +114,7 @@ export default function LegalDocumentPreview({
           className="relative bg-white shadow-xl w-full max-w-[800px] min-h-[1130px] p-10 md:p-16 border border-slate-300 font-serif text-slate-900 antialiased print:p-0 print:border-none print:shadow-none"
         >
           {/* Watermark Overlay (Visual only, removed on official print if approved) */}
-          {draft.status !== "approved_for_print" && (
+          {(
             <div className="absolute inset-0 pointer-events-none select-none flex flex-col justify-center items-center opacity-[0.06] overflow-hidden rotate-[-35deg]">
               <span className="text-5xl md:text-7xl font-bold uppercase tracking-widest text-[#10291f] whitespace-nowrap mb-6">
                 DRAFT ONLY
@@ -155,10 +127,7 @@ export default function LegalDocumentPreview({
 
           {/* Document Content */}
           {template ? (
-            <div 
-              className="prose prose-sm max-w-none text-slate-900 leading-relaxed font-sans"
-              dangerouslySetInnerHTML={{ __html: formatDocumentToHTML(renderedContent) }}
-            />
+            <DocumentText text={renderedContent} />
           ) : (
             <div className="text-center py-20 text-slate-400 text-xs font-serif font-semibold">
               Select an agreement template above and fill in party details to preview the draft.

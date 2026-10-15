@@ -38,18 +38,18 @@ export const AffordabilityCalculator = () => {
         <div className="space-y-3 text-xs">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Monthly Income (INR)</label>
-              <input 
-                type="number" 
+              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="affordabilitycalculator-field-1">Monthly Income (INR)</label>
+              <input id="affordabilitycalculator-field-1"
+                type="number" min="0"
                 value={monthlyIncome} 
                 onChange={(e) => setMonthlyIncome(Number(e.target.value))} 
                 className="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1.5 focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Down Payment (INR)</label>
-              <input 
-                type="number" 
+              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="affordabilitycalculator-field-2">Down Payment (INR)</label>
+              <input id="affordabilitycalculator-field-2"
+                type="number" min="0"
                 value={downPayment} 
                 onChange={(e) => setDownPayment(Number(e.target.value))} 
                 className="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1.5 focus:outline-none"
@@ -58,18 +58,18 @@ export const AffordabilityCalculator = () => {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Existing Monthly EMIs</label>
-              <input 
-                type="number" 
+              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="affordabilitycalculator-field-3">Existing Monthly EMIs</label>
+              <input id="affordabilitycalculator-field-3"
+                type="number" min="0"
                 value={existingObligations} 
                 onChange={(e) => setExistingObligations(Number(e.target.value))} 
                 className="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1.5 focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Preferred EMI Ratio (%)</label>
-              <input 
-                type="number" 
+              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="affordabilitycalculator-field-4">Preferred EMI Ratio (%)</label>
+              <input id="affordabilitycalculator-field-4"
+                type="number" min="0"
                 value={emiRatio} 
                 onChange={(e) => setEmiRatio(Number(e.target.value))} 
                 className="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1.5 focus:outline-none"

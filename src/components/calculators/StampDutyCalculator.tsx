@@ -24,9 +24,9 @@ export const StampDutyCalculator = () => {
 
         <div className="space-y-3 text-xs">
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Property Value (INR)</label>
-            <input 
-              type="number" 
+            <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="stampdutycalculator-field-1">Property Value (INR)</label>
+            <input id="stampdutycalculator-field-1"
+              type="number" min="0"
               value={propertyValue} 
               onChange={(e) => setPropertyValue(Number(e.target.value))} 
               className="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1.5 focus:outline-none"
@@ -34,9 +34,9 @@ export const StampDutyCalculator = () => {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Stamp Duty (%) *</label>
-              <input 
-                type="number" 
+              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="stampdutycalculator-field-2">Stamp Duty (%) *</label>
+              <input id="stampdutycalculator-field-2"
+                type="number" min="0"
                 step="0.01"
                 value={stampDutyRate} 
                 onChange={(e) => setStampDutyRate(Number(e.target.value))} 
@@ -45,9 +45,9 @@ export const StampDutyCalculator = () => {
               <span className="text-[8px] text-slate-400 font-semibold block mt-0.5">* Editable Planning Assumption</span>
             </div>
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Registration (%) *</label>
-              <input 
-                type="number" 
+              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="stampdutycalculator-field-3">Registration (%) *</label>
+              <input id="stampdutycalculator-field-3"
+                type="number" min="0"
                 step="0.01"
                 value={registrationRate} 
                 onChange={(e) => setRegistrationRate(Number(e.target.value))} 
@@ -57,9 +57,9 @@ export const StampDutyCalculator = () => {
             </div>
           </div>
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Other Charges (INR) *</label>
-            <input 
-              type="number" 
+            <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="stampdutycalculator-field-4">Other Charges (INR) *</label>
+            <input id="stampdutycalculator-field-4"
+              type="number" min="0"
               value={otherCharges} 
               onChange={(e) => setOtherCharges(Number(e.target.value))} 
               className="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1.5 focus:outline-none"

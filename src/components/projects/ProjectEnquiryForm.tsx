@@ -32,6 +32,7 @@ const interests = [
 ] as const;
 
 export function ProjectEnquiryForm({
+  projectId,
   projectName,
   initialInterestType = "general_advisory",
   selectedProjects = [],
@@ -57,9 +58,9 @@ export function ProjectEnquiryForm({
     interests.find((item) => item[0] === interest)?.[1] ||
     "General property enquiry";
   const projectNames = selectedProjects.length
-    ? selectedProjects.map((item) => item.name)
+    ? selectedProjects.map((item) => `${item.name} (reference: ${item.id})`)
     : projectName
-      ? [projectName]
+      ? [projectId ? `${projectName} (reference: ${projectId})` : projectName]
       : [];
   const draft = [
     "Hello MS LEGACY,",

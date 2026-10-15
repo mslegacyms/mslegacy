@@ -5,10 +5,7 @@
 
 export const env = {
   supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-  supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
-  
-  // Server-only variables (will be blank on the client/browser bundle)
-  supabaseServiceKey: process.env.SUPABASE_SERVICE_ROLE_KEY || "",
+  supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
 };
 
 /**
@@ -21,6 +18,4 @@ export function isSupabaseConfigured(): boolean {
 /**
  * Checks if the server-side service role key is configured.
  */
-export function isSupabaseServerConfigured(): boolean {
-  return isSupabaseConfigured() && !!env.supabaseServiceKey;
-}
+export const SUBMISSION_UNAVAILABLE = "We couldn't save your enquiry. Your details are still here. Please try again or contact MS LEGACY directly.";

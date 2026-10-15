@@ -189,7 +189,7 @@ export default function NewDocumentWizard({ userProfile }: NewDocumentWizardProp
     setIsSaving(true);
     try {
       const fullDraft = getCombinedDraft() as LegalDocumentDraft;
-      upsertStoredDraft(fullDraft);
+      upsertStoredDraft(fullDraft, userProfile.id);
       router.push("/crm/legal-documents");
     } catch (err) {
       console.error("Failed to save draft:", err);
@@ -212,7 +212,7 @@ export default function NewDocumentWizard({ userProfile }: NewDocumentWizardProp
         timestamp: new Date().toISOString(),
         notes: "Sent for legal review to Advocate officer desk."
       });
-      upsertStoredDraft(fullDraft);
+      upsertStoredDraft(fullDraft, userProfile.id);
       router.push("/crm/legal-documents");
     } catch (err) {
       console.error("Failed to submit review:", err);

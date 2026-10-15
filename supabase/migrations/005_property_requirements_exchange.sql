@@ -126,15 +126,10 @@ ALTER TABLE public.requirement_activity_logs ENABLE ROW LEVEL SECURITY;
 -- 3A. Property Requirements Policies
 
 -- 1. Read sanitized public requirements
-CREATE POLICY "Allow public select of sanitized public requirements"
-  ON public.property_requirements FOR SELECT USING (
-    public_visibility = 'public_sanitized' 
-    AND verification_status IN ('approved_public', 'matched', 'shared_with_partners')
-  );
+-- Public access is intentionally disabled until a separate safe summary projection is implemented.
 
 -- 2. Allow public inserts for client requirements submission
-CREATE POLICY "Allow public insert of requirements"
-  ON public.property_requirements FOR INSERT WITH CHECK (true);
+-- Public access is intentionally disabled until a separate safe summary projection is implemented.
 
 -- 3. CRM Users manage all requirements (founder, admin, sales)
 CREATE POLICY "Founder and Admin manage all requirements"
@@ -158,8 +153,7 @@ CREATE POLICY "CRM users manage matches"
 -- 3C. Requirement Responses Policies
 
 -- 1. Allow public insert for responders
-CREATE POLICY "Allow public insert of responses"
-  ON public.requirement_responses FOR INSERT WITH CHECK (true);
+-- Public access is intentionally disabled until a separate safe summary projection is implemented.
 
 -- 2. CRM users manage all responses
 CREATE POLICY "CRM users manage responses"
@@ -173,3 +167,6 @@ CREATE POLICY "CRM users manage activity logs"
   ON public.requirement_activity_logs FOR ALL USING (
     exists (select 1 from public.profiles p where p.id = auth.uid() and p.role in ('founder', 'admin', 'sales'))
   );
+
+-- Never expose the contact-bearing base tables as a public API.
+REVOKE ALL ON public.property_requirements, public.requirement_responses, public.requirement_matches, public.requirement_activity_logs FROM anon;

@@ -28,12 +28,7 @@ export async function submitPartnerReferral(formData: {
     return { success: false, error: "Unauthorized access." };
   }
 
-  if (!isSupabaseConfigured()) {
-    if (process.env.NODE_ENV === "development") {
-      console.log("[PARTNER REFERRAL LOG] Mock referral submission:", formData);
-    }
-    return { success: true };
-  }
+  if (!isSupabaseConfigured()) return { success: false, error: "Referrals are temporarily unavailable. Please try again later." };
 
   try {
     const supabase = await createClient();
@@ -58,7 +53,7 @@ export async function submitPartnerReferral(formData: {
 
     return { success: true };
 
-  } catch (err: any) {
-    return { success: false, error: err.message || "An unexpected error occurred." };
+  } catch {
+    return { success: false, error: "Could not save the referral. Please try again." };
   }
 }

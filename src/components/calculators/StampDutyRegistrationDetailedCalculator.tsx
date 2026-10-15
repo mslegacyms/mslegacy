@@ -53,18 +53,18 @@ export const StampDutyRegistrationDetailedCalculator = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Market Property Value (INR)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="stampdutyregistrationdetailedcalculator-field-1">Market Property Value (INR)</label>
+          <input id="stampdutyregistrationdetailedcalculator-field-1"
+            type="number" min="0"
             value={propertyValue}
             onChange={(e) => setPropertyValue(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none focus:border-gold-elegant"
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Sub-Registrar Guidance Value (INR)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="stampdutyregistrationdetailedcalculator-field-2">Sub-Registrar Guidance Value (INR)</label>
+          <input id="stampdutyregistrationdetailedcalculator-field-2"
+            type="number" min="0"
             value={guidanceValue}
             onChange={(e) => setGuidanceValue(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none focus:border-gold-elegant"
@@ -74,8 +74,8 @@ export const StampDutyRegistrationDetailedCalculator = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Buyer Type</label>
-          <select
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="stampdutyregistrationdetailedcalculator-field-3">Buyer Type</label>
+          <select id="stampdutyregistrationdetailedcalculator-field-3"
             value={buyerType}
             onChange={(e) => setBuyerType(e.target.value)}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none"
@@ -87,8 +87,8 @@ export const StampDutyRegistrationDetailedCalculator = () => {
           </select>
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Property Type</label>
-          <select
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="stampdutyregistrationdetailedcalculator-field-4">Property Type</label>
+          <select id="stampdutyregistrationdetailedcalculator-field-4"
             value={propertyType}
             onChange={(e) => setPropertyType(e.target.value)}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none"
@@ -99,8 +99,8 @@ export const StampDutyRegistrationDetailedCalculator = () => {
           </select>
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Location Zone</label>
-          <select
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="stampdutyregistrationdetailedcalculator-field-5">Location Zone</label>
+          <select id="stampdutyregistrationdetailedcalculator-field-5"
             value={locationState}
             onChange={(e) => setLocationState(e.target.value)}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none"
@@ -118,9 +118,9 @@ export const StampDutyRegistrationDetailedCalculator = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Stamp Duty (%)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="stampdutyregistrationdetailedcalculator-field-6">Stamp Duty (%)</label>
+          <input id="stampdutyregistrationdetailedcalculator-field-6"
+            type="number" min="0"
             step="0.1"
             value={stampDutyPercent}
             onChange={(e) => setStampDutyPercent(Number(e.target.value))}
@@ -128,9 +128,9 @@ export const StampDutyRegistrationDetailedCalculator = () => {
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Registration Fee (%)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="stampdutyregistrationdetailedcalculator-field-7">Registration Fee (%)</label>
+          <input id="stampdutyregistrationdetailedcalculator-field-7"
+            type="number" min="0"
             step="0.1"
             value={registrationPercent}
             onChange={(e) => setRegistrationPercent(Number(e.target.value))}
@@ -138,9 +138,9 @@ export const StampDutyRegistrationDetailedCalculator = () => {
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Surcharge / Cess (% of Duty)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="stampdutyregistrationdetailedcalculator-field-8">Surcharge / Cess (% of Duty)</label>
+          <input id="stampdutyregistrationdetailedcalculator-field-8"
+            type="number" min="0"
             value={cessPercent}
             onChange={(e) => setCessPercent(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none focus:border-gold-elegant"
@@ -154,18 +154,18 @@ export const StampDutyRegistrationDetailedCalculator = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Legal Review & Drafting (INR)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="stampdutyregistrationdetailedcalculator-field-9">Legal Review & Drafting (INR)</label>
+          <input id="stampdutyregistrationdetailedcalculator-field-9"
+            type="number" min="0"
             value={legalDocCost}
             onChange={(e) => setLegalDocCost(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3.5 py-1.5 text-[#10291f] font-semibold"
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">E-Khata Transfer Services (INR)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="stampdutyregistrationdetailedcalculator-field-10">E-Khata Transfer Services (INR)</label>
+          <input id="stampdutyregistrationdetailedcalculator-field-10"
+            type="number" min="0"
             value={khataCost}
             onChange={(e) => setKhataCost(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3.5 py-1.5 text-[#10291f] font-semibold"
@@ -175,18 +175,18 @@ export const StampDutyRegistrationDetailedCalculator = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Advisory/Service Fees (INR)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="stampdutyregistrationdetailedcalculator-field-11">Advisory/Service Fees (INR)</label>
+          <input id="stampdutyregistrationdetailedcalculator-field-11"
+            type="number" min="0"
             value={brokerageCost}
             onChange={(e) => setBrokerageCost(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3.5 py-1.5 text-[#10291f] font-semibold"
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Miscellaneous / Franking (INR)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="stampdutyregistrationdetailedcalculator-field-12">Miscellaneous / Franking (INR)</label>
+          <input id="stampdutyregistrationdetailedcalculator-field-12"
+            type="number" min="0"
             value={miscCost}
             onChange={(e) => setMiscCost(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3.5 py-1.5 text-[#10291f] font-semibold"

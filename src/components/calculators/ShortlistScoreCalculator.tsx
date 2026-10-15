@@ -41,8 +41,8 @@ export const ShortlistScoreCalculator = () => {
         <div className="space-y-3 text-xs">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Location Potential (1-10)</label>
-              <input 
+              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="shortlistscorecalculator-field-1">Location Potential (1-10)</label>
+              <input id="shortlistscorecalculator-field-1"
                 type="number" 
                 min="1" max="10"
                 value={locationScore} 
@@ -51,8 +51,8 @@ export const ShortlistScoreCalculator = () => {
               />
             </div>
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Legal Title Clarity (1-10)</label>
-              <input 
+              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="shortlistscorecalculator-field-2">Legal Title Clarity (1-10)</label>
+              <input id="shortlistscorecalculator-field-2"
                 type="number" 
                 min="1" max="10"
                 value={legalClarity} 
@@ -63,8 +63,8 @@ export const ShortlistScoreCalculator = () => {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">RERA Registry Entry (1-10)</label>
-              <input 
+              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="shortlistscorecalculator-field-3">RERA Registry Entry (1-10)</label>
+              <input id="shortlistscorecalculator-field-3"
                 type="number" 
                 min="1" max="10"
                 value={reraDoc} 
@@ -73,8 +73,8 @@ export const ShortlistScoreCalculator = () => {
               />
             </div>
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Transit Connectivity (1-10)</label>
-              <input 
+              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="shortlistscorecalculator-field-4">Transit Connectivity (1-10)</label>
+              <input id="shortlistscorecalculator-field-4"
                 type="number" 
                 min="1" max="10"
                 value={connectivity} 
@@ -85,8 +85,8 @@ export const ShortlistScoreCalculator = () => {
           </div>
           <div className="grid grid-cols-3 gap-2">
             <div>
-              <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Promoter Rep</label>
-              <input 
+              <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1" htmlFor="shortlistscorecalculator-field-5">Promoter Rep</label>
+              <input id="shortlistscorecalculator-field-5"
                 type="number" 
                 min="1" max="10"
                 value={reputation} 
@@ -95,8 +95,8 @@ export const ShortlistScoreCalculator = () => {
               />
             </div>
             <div>
-              <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Budget Fit</label>
-              <input 
+              <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1" htmlFor="shortlistscorecalculator-field-6">Budget Fit</label>
+              <input id="shortlistscorecalculator-field-6"
                 type="number" 
                 min="1" max="10"
                 value={budgetFit} 
@@ -105,8 +105,8 @@ export const ShortlistScoreCalculator = () => {
               />
             </div>
             <div>
-              <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Amenities Fit</label>
-              <input 
+              <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1" htmlFor="shortlistscorecalculator-field-7">Amenities Fit</label>
+              <input id="shortlistscorecalculator-field-7"
                 type="number" 
                 min="1" max="10"
                 value={amenitiesFit} 

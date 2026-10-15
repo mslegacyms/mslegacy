@@ -3,15 +3,13 @@ import { useState } from "react";
 import Link from "next/link";
 import { authenticateUser } from "./actions";
 import { PublicIntro } from "@/components/public/PublicComponents";
+import { isSupabaseConfigured } from "@/lib/env";
 export default function LoginPage() {
   const [email, setEmail] = useState(""),
     [password, setPassword] = useState(""),
     [loading, setLoading] = useState(false),
     [error, setError] = useState("");
-  const configured = Boolean(
-    process.env.NEXT_PUBLIC_SUPABASE_URL &&
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-  );
+  const configured = isSupabaseConfigured();
   async function signIn(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!configured) return;
@@ -89,7 +87,7 @@ export default function LoginPage() {
               <h2>Online account access is unavailable.</h2>
               <p>
                 Please contact MS LEGACY about your property or an existing
-                engagement. There is no public role simulator on this page.
+                engagement.
               </p>
             </div>
           )}

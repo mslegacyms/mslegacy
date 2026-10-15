@@ -61,8 +61,8 @@ export const ProjectShortlistScoreDetailedCalculator = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Location Strength ({locationStrength}/10)</label>
-          <input
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="projectshortlistscoredetailedcalculator-field-1">Location Strength ({locationStrength}/10)</label>
+          <input id="projectshortlistscoredetailedcalculator-field-1"
             type="range"
             min="1" max="10"
             value={locationStrength}
@@ -71,8 +71,8 @@ export const ProjectShortlistScoreDetailedCalculator = () => {
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Developer Reputation ({developerReputation}/10)</label>
-          <input
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="projectshortlistscoredetailedcalculator-field-2">Developer Reputation ({developerReputation}/10)</label>
+          <input id="projectshortlistscoredetailedcalculator-field-2"
             type="range"
             min="1" max="10"
             value={developerReputation}
@@ -84,8 +84,8 @@ export const ProjectShortlistScoreDetailedCalculator = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">RERA Entry Clarity ({reraDocClarity}/10)</label>
-          <input
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="projectshortlistscoredetailedcalculator-field-3">RERA Entry Clarity ({reraDocClarity}/10)</label>
+          <input id="projectshortlistscoredetailedcalculator-field-3"
             type="range"
             min="1" max="10"
             value={reraDocClarity}
@@ -94,8 +94,8 @@ export const ProjectShortlistScoreDetailedCalculator = () => {
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Transit Connectivity ({connectivity}/10)</label>
-          <input
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="projectshortlistscoredetailedcalculator-field-4">Transit Connectivity ({connectivity}/10)</label>
+          <input id="projectshortlistscoredetailedcalculator-field-4"
             type="range"
             min="1" max="10"
             value={connectivity}
@@ -107,8 +107,8 @@ export const ProjectShortlistScoreDetailedCalculator = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Price / Value Fit ({priceFit}/10)</label>
-          <input
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="projectshortlistscoredetailedcalculator-field-5">Price / Value Fit ({priceFit}/10)</label>
+          <input id="projectshortlistscoredetailedcalculator-field-5"
             type="range"
             min="1" max="10"
             value={priceFit}
@@ -117,8 +117,8 @@ export const ProjectShortlistScoreDetailedCalculator = () => {
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Unit Plan layout Fit ({unitPlanFit}/10)</label>
-          <input
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="projectshortlistscoredetailedcalculator-field-6">Unit Plan layout Fit ({unitPlanFit}/10)</label>
+          <input id="projectshortlistscoredetailedcalculator-field-6"
             type="range"
             min="1" max="10"
             value={unitPlanFit}
@@ -134,8 +134,8 @@ export const ProjectShortlistScoreDetailedCalculator = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Amenities & Common Areas ({amenitiesFit}/10)</label>
-          <input
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="projectshortlistscoredetailedcalculator-field-7">Amenities & Common Areas ({amenitiesFit}/10)</label>
+          <input id="projectshortlistscoredetailedcalculator-field-7"
             type="range"
             min="1" max="10"
             value={amenitiesFit}
@@ -144,8 +144,8 @@ export const ProjectShortlistScoreDetailedCalculator = () => {
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Rental Potential ({rentalPotential}/10)</label>
-          <input
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="projectshortlistscoredetailedcalculator-field-8">Rental Potential ({rentalPotential}/10)</label>
+          <input id="projectshortlistscoredetailedcalculator-field-8"
             type="range"
             min="1" max="10"
             value={rentalPotential}
@@ -157,8 +157,8 @@ export const ProjectShortlistScoreDetailedCalculator = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Resale Liquidity ({resaleLiquidity}/10)</label>
-          <input
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="projectshortlistscoredetailedcalculator-field-9">Resale Liquidity ({resaleLiquidity}/10)</label>
+          <input id="projectshortlistscoredetailedcalculator-field-9"
             type="range"
             min="1" max="10"
             value={resaleLiquidity}
@@ -167,8 +167,8 @@ export const ProjectShortlistScoreDetailedCalculator = () => {
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Construction Speed ({constructionProgress}/10)</label>
-          <input
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="projectshortlistscoredetailedcalculator-field-10">Construction Speed ({constructionProgress}/10)</label>
+          <input id="projectshortlistscoredetailedcalculator-field-10"
             type="range"
             min="1" max="10"
             value={constructionProgress}
@@ -180,8 +180,8 @@ export const ProjectShortlistScoreDetailedCalculator = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Legal Title Comfort ({legalTitleComfort}/10)</label>
-          <input
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="projectshortlistscoredetailedcalculator-field-11">Legal Title Comfort ({legalTitleComfort}/10)</label>
+          <input id="projectshortlistscoredetailedcalculator-field-11"
             type="range"
             min="1" max="10"
             value={legalTitleComfort}
@@ -190,8 +190,8 @@ export const ProjectShortlistScoreDetailedCalculator = () => {
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">NRI / Offshore Suitability ({nriSuitability}/10)</label>
-          <input
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="projectshortlistscoredetailedcalculator-field-12">NRI / Offshore Suitability ({nriSuitability}/10)</label>
+          <input id="projectshortlistscoredetailedcalculator-field-12"
             type="range"
             min="1" max="10"
             value={nriSuitability}

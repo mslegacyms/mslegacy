@@ -1,77 +1,37 @@
 "use server";
-
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { type UserRole } from "@/lib/auth/roles";
+import { isSupabaseConfigured } from "@/lib/env";
+import { isUserRole } from "@/lib/auth/roles";
 import { getRedirectRouteByRole } from "@/lib/auth/redirectByRole";
 
-export interface LoginResult {
-  success: boolean;
-  error?: string;
-  redirectUrl?: string;
-}
-
-/**
- * Server action to authenticate a user.
- * Supports active Supabase auth or fallback mock role-based cookie generation.
- */
-export async function authenticateUser(
-  email: string,
-  password?: string,
-  mockRole?: UserRole
-): Promise<LoginResult> {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  const cookieStore = await cookies();
-
-  // 1. FALLBACK MOCK MODE: Keys are missing
-  if (!supabaseUrl || !supabaseAnonKey) {
-    if (!mockRole) {
-      return { success: false, error: "Please select a role for simulation." };
-    }
-    
-    // Set a mock user cookie containing their role (valid for 1 hour)
-    cookieStore.set("mslegacy_mock_user", mockRole, {
-      maxAge: 3600,
-      path: "/",
-    });
-    
-    const targetUrl = getRedirectRouteByRole(mockRole);
-    return { success: true, redirectUrl: targetUrl };
+export interface LoginResult { success: boolean; error?: string; redirectUrl?: string }
+export async function authenticateUser(email: string, password?: string): Promise<LoginResult> {
+  if (!isSupabaseConfigured()) return { success: false, error: "Secure sign-in is temporarily unavailable. Please contact MS LEGACY." };
+  if (typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) || email.length > 254 || typeof password !== "string" || !password || password.length > 1024) {
+    return { success: false, error: "Enter your registered email and password." };
   }
-
-  // 2. ACTIVE SUPABASE MODE: Keys exist
   try {
     const supabase = await createClient();
-    
-    // Authenticate credentials
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password: password || "",
-    });
-
-    if (error || !data.user) {
-      return { success: false, error: error?.message || "Invalid credentials." };
+    const { data, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+    if (error || !data.user) return { success: false, error: "Sign-in failed. Check your credentials and try again." };
+    const { data: profile, error: profileError } = await supabase.from("profiles").select("role, status").eq("id", data.user.id).single();
+    if (profileError || !profile || profile.status !== "active" || !isUserRole(profile.role)) {
+      await supabase.auth.signOut();
+      return { success: false, error: "Your portal access is unavailable. Please contact MS LEGACY." };
     }
+    (await cookies()).delete("mslegacy_mock_user");
+    return { success: true, redirectUrl: getRedirectRouteByRole(profile.role) };
+  } catch { return { success: false, error: "Sign-in is temporarily unavailable. Please try again." }; }
+}
 
-    // Retrieve profile role to assign redirect routing
-    const { data: profile, error: profileErr } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", data.user.id)
-      .single();
-
-    if (profileErr || !profile) {
-      // Default to client if profile is missing
-      cookieStore.set("mslegacy_mock_user", "client", { maxAge: 3600, path: "/" });
-      return { success: true, redirectUrl: "/client/dashboard" };
-    }
-
-    const role = profile.role as UserRole;
-    const targetUrl = getRedirectRouteByRole(role);
-    return { success: true, redirectUrl: targetUrl };
-
-  } catch (err: any) {
-    return { success: false, error: err.message || "An authentication error occurred." };
+export async function logout(): Promise<void> {
+  if (isSupabaseConfigured()) {
+    const supabase = await createClient();
+    const { error } = await supabase.auth.signOut();
+    if (error) throw new Error("Sign-out could not be completed. Please try again.");
   }
+  (await cookies()).delete("mslegacy_mock_user");
+  redirect("/login");
 }

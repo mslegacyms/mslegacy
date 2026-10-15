@@ -25,18 +25,18 @@ export const ConstructionCostCalculator = () => {
         <div className="space-y-3 text-xs">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Built-up Area (Sq.Ft)</label>
-              <input 
-                type="number" 
+              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="constructioncostcalculator-field-1">Built-up Area (Sq.Ft)</label>
+              <input id="constructioncostcalculator-field-1"
+                type="number" min="0"
                 value={builtUpArea} 
                 onChange={(e) => setBuiltUpArea(Number(e.target.value))} 
                 className="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1.5 focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Rate per Sq.Ft (INR)</label>
-              <input 
-                type="number" 
+              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="constructioncostcalculator-field-2">Rate per Sq.Ft (INR)</label>
+              <input id="constructioncostcalculator-field-2"
+                type="number" min="0"
                 value={ratePerSqFt} 
                 onChange={(e) => setRatePerSqFt(Number(e.target.value))} 
                 className="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1.5 focus:outline-none"
@@ -45,18 +45,18 @@ export const ConstructionCostCalculator = () => {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Interiors Budget (INR)</label>
-              <input 
-                type="number" 
+              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="constructioncostcalculator-field-3">Interiors Budget (INR)</label>
+              <input id="constructioncostcalculator-field-3"
+                type="number" min="0"
                 value={interiorsCost} 
                 onChange={(e) => setInteriorsCost(Number(e.target.value))} 
                 className="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1.5 focus:outline-none"
               />
             </div>
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Contingency Rate (%)</label>
-              <input 
-                type="number" 
+              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="constructioncostcalculator-field-4">Contingency Rate (%)</label>
+              <input id="constructioncostcalculator-field-4"
+                type="number" min="0"
                 value={contingencyPercentage} 
                 onChange={(e) => setContingencyPercentage(Number(e.target.value))} 
                 className="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1.5 focus:outline-none"

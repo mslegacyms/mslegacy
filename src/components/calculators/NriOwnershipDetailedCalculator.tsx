@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { monthlyPayment, validateNumbers } from "@/lib/calculators/financialMath";
 import { formatINR } from "@/lib/utils";
 import { CalculatorShell } from "./CalculatorShell";
 import { CalculatorActionBar } from "./CalculatorActionBar";
@@ -11,7 +12,7 @@ export const NriOwnershipDetailedCalculator = () => {
   const [fxRate, setFxRate] = useState(83.5);
   const [loanPercentage, setLoanPercentage] = useState(70);
   const [interestRate, setInterestRate] = useState(8.75); // NRI loan rates are usually slightly higher
-  const [tenure, setTenure] = useState(15); // NRI loan tenures are usually shorter (max 15 years)
+  const [tenure, setTenure] = useState(15); // Editable planning assumption; lender terms vary.
   
   // Expenses
   const [annualMaintenance, setAnnualMaintenance] = useState(72000);
@@ -25,25 +26,19 @@ export const NriOwnershipDetailedCalculator = () => {
   const loanAmount = propertyPrice * (loanPercentage / 100);
   const equityRequired = propertyPrice - loanAmount;
 
-  const r = interestRate / 12 / 100;
-  const n = tenure * 12;
-
-  let emi = 0;
-  if (r > 0) {
-    emi = (loanAmount * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
-  } else {
-    emi = loanAmount / n;
-  }
+  const validationError = validateNumbers({ propertyPrice, fxRate, loanPercentage, interestRate, tenure, annualMaintenance, annualTax, propertyManagementCost, expectedRent, vacancyRate, annualTravelCost, annualRepairReserve }, ["propertyPrice", "fxRate", "tenure"], ["loanPercentage", "interestRate", "vacancyRate"])
+    || (tenure > 50 || !Number.isInteger(tenure * 12) ? "Enter a term of up to 50 years in whole months." : undefined);
+  const emi = monthlyPayment(loanAmount, interestRate, tenure * 12);
 
   const annualLoanRepayment = emi * 12;
   const annualRentalIncome = expectedRent * 12 * (1 - vacancyRate / 100);
   
   const annualHoldingExpenses = annualMaintenance + annualTax + propertyManagementCost + annualTravelCost + annualRepairReserve;
   const totalAnnualOutflow = annualLoanRepayment + annualHoldingExpenses;
-  const netAnnualOutflow = Math.max(0, totalAnnualOutflow - annualRentalIncome);
+  const netAnnualOutflow = totalAnnualOutflow - annualRentalIncome;
 
   const monthlyOutflowINR = netAnnualOutflow / 12;
-  const monthlyOutflowFx = monthlyOutflowINR / fxRate;
+  const monthlyOutflowFx = fxRate > 0 ? monthlyOutflowINR / fxRate : 0;
 
   // NRI Readiness score
   let readinessScore = 80;
@@ -57,10 +52,10 @@ export const NriOwnershipDetailedCalculator = () => {
 *   **Loan Funding Ratio (${loanPercentage}%)**: ${formatINR(loanAmount)}
 *   **EMI Outflow**: ${formatINR(Math.round(emi))} / month
 *   **Annual Outflow (Loan + Maintenance)**: ${formatINR(totalAnnualOutflow)}
-*   **Net Annual Outflow (adjusted for rent)**: ${formatINR(netAnnualOutflow)}
+*   **Net Annual Outflow (negative means surplus)**: ${formatINR(netAnnualOutflow)}
 *   **Monthly Outflow (${currency})**: ${currency} ${monthlyOutflowFx.toFixed(2)}
 *   **NRI Management Readiness Score**: ${readinessScore}/100
-*   *Note: Projections only. FX rates and rental occupancy fluctuate.*`;
+*   *Note: Projections only. FX is an undated user assumption, not a live quote. Negative outflow means surplus. Legal purchase eligibility needs separate review.*`;
 
   const inputs = (
     <div className="space-y-6 text-xs text-slate-700 font-sans">
@@ -70,18 +65,18 @@ export const NriOwnershipDetailedCalculator = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="sm:col-span-2">
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Property Value (INR)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="nriownershipdetailedcalculator-field-1">Property Value (INR)</label>
+          <input id="nriownershipdetailedcalculator-field-1"
+            type="number" min="0"
             value={propertyPrice}
             onChange={(e) => setPropertyPrice(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none"
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Loan Ratio (%)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="nriownershipdetailedcalculator-field-2">Loan Ratio (%)</label>
+          <input id="nriownershipdetailedcalculator-field-2"
+            type="number" min="0"
             value={loanPercentage}
             onChange={(e) => setLoanPercentage(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none"
@@ -91,8 +86,8 @@ export const NriOwnershipDetailedCalculator = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Forex Currency</label>
-          <select
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="nriownershipdetailedcalculator-field-3">Forex Currency</label>
+          <select id="nriownershipdetailedcalculator-field-3"
             value={currency}
             onChange={(e) => setCurrency(e.target.value)}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none"
@@ -104,9 +99,9 @@ export const NriOwnershipDetailedCalculator = () => {
           </select>
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">FX Conversion Rate</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="nriownershipdetailedcalculator-field-4">FX Conversion Rate</label>
+          <input id="nriownershipdetailedcalculator-field-4"
+            type="number" min="0"
             step="0.01"
             value={fxRate}
             onChange={(e) => setFxRate(Number(e.target.value))}
@@ -114,9 +109,9 @@ export const NriOwnershipDetailedCalculator = () => {
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Loan Interest (%)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="nriownershipdetailedcalculator-field-5">Loan Interest (%)</label>
+          <input id="nriownershipdetailedcalculator-field-5"
+            type="number" min="0"
             step="0.05"
             value={interestRate}
             onChange={(e) => setInterestRate(Number(e.target.value))}
@@ -131,27 +126,27 @@ export const NriOwnershipDetailedCalculator = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Annual Maintenance</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="nriownershipdetailedcalculator-field-6">Annual Maintenance</label>
+          <input id="nriownershipdetailedcalculator-field-6"
+            type="number" min="0"
             value={annualMaintenance}
             onChange={(e) => setAnnualMaintenance(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none"
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Property Tax (Annual)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="nriownershipdetailedcalculator-field-7">Property Tax (Annual)</label>
+          <input id="nriownershipdetailedcalculator-field-7"
+            type="number" min="0"
             value={annualTax}
             onChange={(e) => setAnnualTax(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none"
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Management Retainer</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="nriownershipdetailedcalculator-field-8">Management Retainer</label>
+          <input id="nriownershipdetailedcalculator-field-8"
+            type="number" min="0"
             value={propertyManagementCost}
             onChange={(e) => setPropertyManagementCost(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none"
@@ -161,27 +156,27 @@ export const NriOwnershipDetailedCalculator = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Expected Rent (Monthly)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="nriownershipdetailedcalculator-field-9">Expected Rent (Monthly)</label>
+          <input id="nriownershipdetailedcalculator-field-9"
+            type="number" min="0"
             value={expectedRent}
             onChange={(e) => setExpectedRent(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none"
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Vacancy factor (%)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="nriownershipdetailedcalculator-field-10">Vacancy factor (%)</label>
+          <input id="nriownershipdetailedcalculator-field-10"
+            type="number" min="0"
             value={vacancyRate}
             onChange={(e) => setVacancyRate(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none"
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Annual Travel Cost</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="nriownershipdetailedcalculator-field-11">Annual Travel Cost</label>
+          <input id="nriownershipdetailedcalculator-field-11"
+            type="number" min="0"
             value={annualTravelCost}
             onChange={(e) => setAnnualTravelCost(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none"
@@ -261,6 +256,7 @@ export const NriOwnershipDetailedCalculator = () => {
 
   return (
     <CalculatorShell
+      validationError={validationError}
       title="NRI Property Ownership Planner"
       subtitle="Map forex conversion rates, holding costs, tax adjustments, and local property management fees."
       category="NRI & Rental Yield"

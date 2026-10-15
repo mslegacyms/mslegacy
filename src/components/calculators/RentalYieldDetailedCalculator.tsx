@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { validateNumbers } from "@/lib/calculators/financialMath";
 import { formatINR } from "@/lib/utils";
 import { CalculatorShell } from "./CalculatorShell";
 import { CalculatorActionBar } from "./CalculatorActionBar";
@@ -19,6 +20,8 @@ export const RentalYieldDetailedCalculator = () => {
   const [propertyManagementFeePercent, setPropertyManagementFeePercent] = useState(8); // % of monthly rent
   const [appreciationAssumption, setAppreciationAssumption] = useState(5); // % annual appreciation
 
+  const validationError = validateNumbers({ propertyPrice, monthlyRent, deposit, maintenanceCharges, propertyTax, insurance, vacancyRate, brokerageLeasing, repairReserve, loanEmi, propertyManagementFeePercent, appreciationAssumption }, ["propertyPrice"], ["vacancyRate", "propertyManagementFeePercent", "appreciationAssumption"]);
+
   const annualGrossRent = monthlyRent * 12;
   const vacancyLoss = annualGrossRent * (vacancyRate / 100);
   const propertyManagementFee = annualGrossRent * (propertyManagementFeePercent / 100);
@@ -27,18 +30,18 @@ export const RentalYieldDetailedCalculator = () => {
   const totalAnnualExpenses = propertyTax + insurance + totalAnnualMaintenance + propertyManagementFee + brokerageLeasing + repairReserve;
   const netOperatingIncome = annualGrossRent - vacancyLoss - totalAnnualExpenses;
 
-  const grossYield = (annualGrossRent / propertyPrice) * 100;
+  const grossYield = propertyPrice > 0 ? (annualGrossRent / propertyPrice) * 100 : 0;
   const netYield = propertyPrice > 0 ? (netOperatingIncome / propertyPrice) * 100 : 0;
 
   const annualEmiCost = loanEmi * 12;
   const netCashFlowAfterEmi = netOperatingIncome - annualEmiCost;
 
-  // Investment Quality Score
+  // Cash-flow Scenario Indicator
   let qualityScore = 50;
   if (netYield >= 4.5) qualityScore += 20;
   else if (netYield >= 3.0) qualityScore += 10;
   if (netCashFlowAfterEmi > 0) qualityScore += 20;
-  if (appreciationAssumption >= 6) qualityScore += 10;
+  // Assumed appreciation cannot improve the cash-flow indicator.
   qualityScore = Math.max(10, Math.min(100, qualityScore));
 
   const summaryMarkdown = `### Rental Yield Detailed Projections
@@ -51,7 +54,7 @@ export const RentalYieldDetailedCalculator = () => {
 *   **Gross Rental Yield**: ${grossYield.toFixed(2)}%
 *   **Net Rental Yield**: ${netYield.toFixed(2)}%
 *   **Annual Cash Flow (after EMIs)**: ${formatINR(netCashFlowAfterEmi)}
-*   **Investment Quality Score**: ${qualityScore}/100
+*   **Cash-flow Scenario Indicator**: ${qualityScore}/100
 *   *Note: Projections only. Yields and cash flows fluctuate and are not guaranteed.*`;
 
   const inputs = (
@@ -62,18 +65,18 @@ export const RentalYieldDetailedCalculator = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Property Price (INR)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="rentalyielddetailedcalculator-field-1">Property Price (INR)</label>
+          <input id="rentalyielddetailedcalculator-field-1"
+            type="number" min="0"
             value={propertyPrice}
             onChange={(e) => setPropertyPrice(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none focus:border-gold-elegant"
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Expected Monthly Rent (INR)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="rentalyielddetailedcalculator-field-2">Expected Monthly Rent (INR)</label>
+          <input id="rentalyielddetailedcalculator-field-2"
+            type="number" min="0"
             value={monthlyRent}
             onChange={(e) => setMonthlyRent(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none focus:border-gold-elegant"
@@ -83,27 +86,27 @@ export const RentalYieldDetailedCalculator = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Tenant Deposit (INR)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="rentalyielddetailedcalculator-field-3">Tenant Deposit (INR)</label>
+          <input id="rentalyielddetailedcalculator-field-3"
+            type="number" min="0"
             value={deposit}
             onChange={(e) => setDeposit(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none"
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Vacancy Rate (%)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="rentalyielddetailedcalculator-field-4">Vacancy Rate (%)</label>
+          <input id="rentalyielddetailedcalculator-field-4"
+            type="number" min="0"
             value={vacancyRate}
             onChange={(e) => setVacancyRate(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none"
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Appreciation Est. (%/yr)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="rentalyielddetailedcalculator-field-5">Appreciation Est. (%/yr)</label>
+          <input id="rentalyielddetailedcalculator-field-5"
+            type="number" min="0"
             value={appreciationAssumption}
             onChange={(e) => setAppreciationAssumption(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none"
@@ -117,27 +120,27 @@ export const RentalYieldDetailedCalculator = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Maintenance (Monthly)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="rentalyielddetailedcalculator-field-6">Maintenance (Monthly)</label>
+          <input id="rentalyielddetailedcalculator-field-6"
+            type="number" min="0"
             value={maintenanceCharges}
             onChange={(e) => setMaintenanceCharges(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none"
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Property Tax (Annual)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="rentalyielddetailedcalculator-field-7">Property Tax (Annual)</label>
+          <input id="rentalyielddetailedcalculator-field-7"
+            type="number" min="0"
             value={propertyTax}
             onChange={(e) => setPropertyTax(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none"
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Insurance (Annual)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="rentalyielddetailedcalculator-field-8">Insurance (Annual)</label>
+          <input id="rentalyielddetailedcalculator-field-8"
+            type="number" min="0"
             value={insurance}
             onChange={(e) => setInsurance(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none"
@@ -147,27 +150,27 @@ export const RentalYieldDetailedCalculator = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Brokerage / Leasing (Annual)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="rentalyielddetailedcalculator-field-9">Brokerage / Leasing (Annual)</label>
+          <input id="rentalyielddetailedcalculator-field-9"
+            type="number" min="0"
             value={brokerageLeasing}
             onChange={(e) => setBrokerageLeasing(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none"
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Repair Reserve (Annual)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="rentalyielddetailedcalculator-field-10">Repair Reserve (Annual)</label>
+          <input id="rentalyielddetailedcalculator-field-10"
+            type="number" min="0"
             value={repairReserve}
             onChange={(e) => setRepairReserve(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none"
           />
         </div>
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Management Fee (%)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="rentalyielddetailedcalculator-field-11">Management Fee (%)</label>
+          <input id="rentalyielddetailedcalculator-field-11"
+            type="number" min="0"
             value={propertyManagementFeePercent}
             onChange={(e) => setPropertyManagementFeePercent(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 text-[#10291f] font-semibold focus:outline-none"
@@ -177,9 +180,9 @@ export const RentalYieldDetailedCalculator = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Monthly Home Loan EMI (If any)</label>
-          <input
-            type="number"
+          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1" htmlFor="rentalyielddetailedcalculator-field-12">Monthly Home Loan EMI (If any)</label>
+          <input id="rentalyielddetailedcalculator-field-12"
+            type="number" min="0"
             value={loanEmi}
             onChange={(e) => setLoanEmi(Number(e.target.value))}
             className="w-full bg-[#f8f5ef]/50 border border-slate-200 rounded px-3.5 py-1.5 text-[#10291f] font-semibold"
@@ -225,7 +228,7 @@ export const RentalYieldDetailedCalculator = () => {
 
       <div className="border-t border-[#1d3e30] pt-4 space-y-2">
         <div className="flex justify-between font-medium">
-          <span className="text-slate-300">Investment Quality Score:</span>
+          <span className="text-slate-300">Cash-flow Scenario Indicator:</span>
           <span className={`font-bold ${qualityScore >= 70 ? "text-emerald-400" : qualityScore >= 50 ? "text-amber-400" : "text-rose-400"}`}>
             {qualityScore}/100
           </span>
@@ -270,6 +273,7 @@ export const RentalYieldDetailedCalculator = () => {
 
   return (
     <CalculatorShell
+      validationError={validationError}
       title="Rental Yield Planner"
       subtitle="Analyze gross and net rental yields, vacancy losses, maintenance costs, and cash flow margins."
       category="NRI & Rental Yield"

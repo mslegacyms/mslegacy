@@ -77,15 +77,14 @@ export const ApartmentDevelopmentCalculator = () => {
   const [discountProvisionPercent, setDiscountProvisionPercent] = useState(5);
   const [channelPartnerCommissionPercent, setChannelPartnerCommissionPercent] = useState(3);
 
-  const [crmSynced, setCrmSynced] = useState(false);
 
   // 7. Checklist state
   const [checklistItems, setChecklistItems] = useState([
-    { id: "mother_deed", name: "Mother deed / 30-year trace", status: "Verified" },
-    { id: "rtc", name: "RTC/Pahani check", status: "Verified" },
+    { id: "mother_deed", name: "Mother deed / 30-year trace", status: "Pending" },
+    { id: "rtc", name: "RTC/Pahani check", status: "Pending" },
     { id: "mutation", name: "Mutation order extract", status: "Pending" },
-    { id: "ec", name: "Encumbrance Certificate (EC)", status: "Verified" },
-    { id: "tax_receipt", name: "Tax paid receipt", status: "Verified" },
+    { id: "ec", name: "Encumbrance Certificate (EC)", status: "Pending" },
+    { id: "tax_receipt", name: "Tax paid receipt", status: "Pending" },
     { id: "survey_sketch", name: "Survey sketch (Mojini 11E)", status: "Pending" },
     { id: "conversion_order", name: "DC conversion order", status: "Pending" },
     { id: "zoning_confirmation", name: "Zoning confirmation", status: "Pending" },
@@ -97,7 +96,7 @@ export const ApartmentDevelopmentCalculator = () => {
 
   // 8. Risk items state
   const [risks, setRisks] = useState([
-    { id: "title", name: "Title risk", status: "Low", reason: "Title audit cleared with zero disputes", action: "Execute release deeds where needed" },
+    { id: "title", name: "Title risk", status: "Low", reason: "Title evidence has not been independently reviewed", action: "Execute release deeds where needed" },
     { id: "conversion", name: "Conversion risk", status: "Medium", reason: "Zoning conversion in process", action: "Secure Taluk board clearance" },
     { id: "zoning", name: "Zoning FAR risk", status: "Medium", reason: "Maximum FAR depends on final road width", action: "Verify road buffer width physically" },
     { id: "parking", name: "Parking design risk", status: "Low", reason: "Basement design accommodates required slots", action: "Obtain structural check" },
@@ -139,7 +138,9 @@ export const ApartmentDevelopmentCalculator = () => {
   const landAcres = totalSqft / 43560;
 
   // FAR Potential Math
-  const totalFARUsed = baseFAR + premiumFAR + tdrFAR;
+  const profile = apartmentAuthorityProfiles[selectedAuthority] || apartmentAuthorityProfiles.bda_bbmp;
+  const requestedFAR = baseFAR + premiumFAR + tdrFAR;
+  const totalFARUsed = Math.max(0, Math.min(requestedFAR, profile.maxPermissibleFAR));
   const permissibleBuiltUpSqft = totalSqft * totalFARUsed;
   
   // Ground coverage and basement Math
@@ -156,7 +157,7 @@ export const ApartmentDevelopmentCalculator = () => {
   const calculatedUnits = unitMix.map(row => {
     if (!row.enabled) return { ...row, count: 0, areaConsumed: 0 };
     const allocatedArea = saleableSqft * (row.mixPercent / 100);
-    const count = Math.floor(allocatedArea / row.sizeSqft);
+    const count = row.sizeSqft > 0 ? Math.floor(allocatedArea / row.sizeSqft) : 0;
     return {
       ...row,
       count,
@@ -169,7 +170,6 @@ export const ApartmentDevelopmentCalculator = () => {
   const balanceSqft = Math.max(0, saleableSqft - totalAreaConsumed);
 
   // Parking Math
-  const profile = apartmentAuthorityProfiles[selectedAuthority] || apartmentAuthorityProfiles.bda_bbmp;
   const carParksRequired = Math.ceil(totalUnitsVal * profile.carParkingPerUnit);
   const visitorParks = Math.ceil(carParksRequired * (profile.visitorParkingPercent / 100));
   const totalCarParks = carParksRequired + visitorParks;
@@ -202,8 +202,8 @@ export const ApartmentDevelopmentCalculator = () => {
     ? calculatedUnits.reduce((acc, u) => acc + (u.count * u.sizeSqft * u.sellPricePerSqft), 0) / totalAreaConsumed
     : 6500;
 
-  const grossGDV = saleableSqft * weightedSellingRate;
-  const breakEvenRate = Math.round(totalProjectCostTillLaunch / saleableSqft);
+  const grossGDV = calculatedUnits.reduce((sum, row) => sum + row.areaConsumed * row.sellPricePerSqft, 0);
+  const breakEvenRate = saleableSqft > 0 ? Math.round(totalProjectCostTillLaunch / saleableSqft) : 0;
   
   const discountVal = grossGDV * (discountProvisionPercent / 100);
   const cpCommission = grossGDV * (channelPartnerCommissionPercent / 100);
@@ -270,13 +270,13 @@ export const ApartmentDevelopmentCalculator = () => {
       `Land size: ${landSize} ${unit} (${totalSqft.toLocaleString()} Sq.Ft)\n` +
       `Authority selected: ${profile.authorityName || "Custom"}\n` +
       `FAR Used: ${totalFARUsed} (Base: ${baseFAR}, Premium: ${premiumFAR}, TDR: ${tdrFAR})\n` +
-      `Permissible Built-up Area: ${permissibleBuiltUpSqft.toLocaleString()} Sq.Ft\n` +
+      `Theoretical FAR Capacity (preset cap applied): ${permissibleBuiltUpSqft.toLocaleString()} Sq.Ft\n` +
       `Net Saleable Apartment Area: ${saleableSqft.toLocaleString()} Sq.Ft\n` +
       `Estimated units count: ${totalUnitsVal} units\n` +
       `Estimated project cost till launch: ${formatINR(totalProjectCostTillLaunch)}\n` +
       `Break-even selling price: ${formatINR(breakEvenRate)} per Sq.Ft\n` +
       `Estimated GDV: ${formatINR(grossGDV)}\n` +
-      `Launch viability score: ${overallReadinessScore}/100`;
+      `Illustrative checklist score: ${overallReadinessScore}/100`;
     navigator.clipboard.writeText(text);
     alert("Feasibility summary copied to clipboard!");
   };
@@ -286,12 +286,12 @@ export const ApartmentDevelopmentCalculator = () => {
   };
 
   const handleCrmSync = () => {
-    setCrmSynced(true);
-    alert("Lead feasibility calculations queued under CRM Intake Desk!");
+    window.location.assign("/contact?interestType=apartment_feasibility_review");
   };
 
   return (
     <div className="space-y-8 font-sans text-xs text-[#1f2a24]">
+      <p role="status" className="max-w-6xl mx-auto p-4 bg-amber-50 text-amber-900 text-sm">Illustrative area and cost model. Authority defaults are editable assumptions. Plot geometry, setbacks, height, parking and approval eligibility require a coordinated architect review. Financing is excluded from these totals.</p>
       {/* Warnings & Validations */}
       {totalMixSum !== 100 && (
         <div className="bg-amber-50 border border-amber-200 text-amber-700 p-4 rounded max-w-[1440px] mx-auto text-center font-bold">
@@ -321,7 +321,7 @@ export const ApartmentDevelopmentCalculator = () => {
                 </label>
                 <div className="flex space-x-2">
                   <input
-                    type="number"
+                    type="number" min="0"
                     value={landSize}
                     onChange={(e) => setLandSize(Math.max(0.1, Number(e.target.value)))}
                     className="w-2/3 bg-[#f8f5ef]/50 border border-slate-200 rounded px-3 py-2 font-bold text-[#1f2a24] focus:outline-none"
@@ -340,8 +340,8 @@ export const ApartmentDevelopmentCalculator = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-[10px] font-bold text-[#5f6b63] uppercase">Approval Authority Profile</label>
-                <select
+                <label className="block text-[10px] font-bold text-[#5f6b63] uppercase" htmlFor="apartmentdevelopmentcalculator-field-1">Approval Authority Profile</label>
+                <select id="apartmentdevelopmentcalculator-field-1"
                   value={selectedAuthority}
                   onChange={(e) => setSelectedAuthority(e.target.value)}
                   className="w-full bg-white border border-slate-200 rounded px-3 py-2 font-bold text-[#8b6e3a] focus:outline-none"
@@ -361,9 +361,9 @@ export const ApartmentDevelopmentCalculator = () => {
             <h3 className="font-serif text-sm font-bold text-[#10291f] border-b pb-2">B. FAR, Built-up Area & Saleable Area</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div className="space-y-1.5">
-                <label className="block text-[10px] font-bold text-[#5f6b63] uppercase">Base FAR</label>
-                <input
-                  type="number"
+                <label className="block text-[10px] font-bold text-[#5f6b63] uppercase" htmlFor="apartmentdevelopmentcalculator-field-2">Base FAR</label>
+                <input id="apartmentdevelopmentcalculator-field-2"
+                  type="number" min="0"
                   value={baseFAR}
                   disabled={selectedAuthority !== "custom"}
                   onChange={(e) => { setBaseFAR(Number(e.target.value)); setIsCustomEdited(true); }}
@@ -371,9 +371,9 @@ export const ApartmentDevelopmentCalculator = () => {
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-[10px] font-bold text-[#5f6b63] uppercase">Premium FAR</label>
-                <input
-                  type="number"
+                <label className="block text-[10px] font-bold text-[#5f6b63] uppercase" htmlFor="apartmentdevelopmentcalculator-field-3">Premium FAR</label>
+                <input id="apartmentdevelopmentcalculator-field-3"
+                  type="number" min="0"
                   value={premiumFAR}
                   disabled={selectedAuthority !== "custom"}
                   onChange={(e) => { setPremiumFAR(Number(e.target.value)); setIsCustomEdited(true); }}
@@ -381,9 +381,9 @@ export const ApartmentDevelopmentCalculator = () => {
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-[10px] font-bold text-[#5f6b63] uppercase">TDR FAR</label>
-                <input
-                  type="number"
+                <label className="block text-[10px] font-bold text-[#5f6b63] uppercase" htmlFor="apartmentdevelopmentcalculator-field-4">TDR FAR</label>
+                <input id="apartmentdevelopmentcalculator-field-4"
+                  type="number" min="0"
                   value={tdrFAR}
                   disabled={selectedAuthority !== "custom"}
                   onChange={(e) => { setTdrFAR(Number(e.target.value)); setIsCustomEdited(true); }}
@@ -391,9 +391,9 @@ export const ApartmentDevelopmentCalculator = () => {
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-[10px] font-bold text-[#5f6b63] uppercase">Ground Coverage %</label>
-                <input
-                  type="number"
+                <label className="block text-[10px] font-bold text-[#5f6b63] uppercase" htmlFor="apartmentdevelopmentcalculator-field-5">Ground Coverage %</label>
+                <input id="apartmentdevelopmentcalculator-field-5"
+                  type="number" min="0"
                   value={groundCoveragePercent}
                   disabled={selectedAuthority !== "custom"}
                   onChange={(e) => { setGroundCoveragePercent(Number(e.target.value)); setIsCustomEdited(true); }}
@@ -408,7 +408,7 @@ export const ApartmentDevelopmentCalculator = () => {
                 <span className="font-bold text-[#10291f]">{totalFARUsed}</span>
               </div>
               <div className="flex justify-between">
-                <span>Permissible Built-up Area:</span>
+                <span>Theoretical FAR Capacity (preset cap applied):</span>
                 <span className="font-bold text-[#10291f]">{permissibleBuiltUpSqft.toLocaleString()} sq.ft</span>
               </div>
               <div className="flex justify-between text-emerald-800 font-bold">
@@ -442,7 +442,7 @@ export const ApartmentDevelopmentCalculator = () => {
                   <div className="flex items-center space-x-1.5">
                     <span className="text-[10px] text-[#5f6b63]">Size:</span>
                     <input
-                      type="number"
+                      type="number" min="0"
                       value={row.sizeSqft}
                       disabled={!row.enabled}
                       onChange={(e) => handleUnitMixChange(row.id, "sizeSqft", Number(e.target.value))}
@@ -452,7 +452,7 @@ export const ApartmentDevelopmentCalculator = () => {
                   <div className="flex items-center space-x-1.5">
                     <span className="text-[10px] text-[#5f6b63]">Mix%:</span>
                     <input
-                      type="number"
+                      type="number" min="0"
                       value={row.mixPercent}
                       disabled={!row.enabled}
                       onChange={(e) => handleUnitMixChange(row.id, "mixPercent", Number(e.target.value))}
@@ -462,7 +462,7 @@ export const ApartmentDevelopmentCalculator = () => {
                   <div className="flex items-center space-x-1.5">
                     <span className="text-[10px] text-[#5f6b63]">Price:</span>
                     <input
-                      type="number"
+                      type="number" min="0"
                       value={row.sellPricePerSqft}
                       disabled={!row.enabled}
                       onChange={(e) => handleUnitMixChange(row.id, "sellPricePerSqft", Number(e.target.value))}
@@ -545,10 +545,10 @@ export const ApartmentDevelopmentCalculator = () => {
                 <Button 
                   onClick={handleCrmSync}
                   className={`font-bold text-[9px] py-2 px-2 h-auto border-none ${
-                    crmSynced ? "bg-emerald-700 text-white" : "bg-[#8b6e3a] text-white"
+                    "bg-[#8b6e3a] text-white"
                   }`}
                 >
-                  {crmSynced ? "Saved" : "Save Lead"}
+                  Request review
                 </Button>
               </div>
               <Link href="/contact?interestType=apartment_feasibility_review" className="block pt-1">

@@ -1,6 +1,11 @@
 import type { MetadataRoute } from "next";
 import { publicSite } from "@/lib/publicSite";
-export default function sitemap(): MetadataRoute.Sitemap {
+import { getProjects } from "@/lib/developers/projects";
+import { getDevelopers } from "@/lib/developers/developers";
+import { isPublicProject } from "@/lib/projectPresentation";
+import { mockNewsUpdates } from "@/lib/data/mockNewsUpdates";
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const routes = [
     "",
     "/about",
@@ -18,10 +23,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/project-disclaimer",
     "/channel-partners",
     "/project-participation",
+    "/developers",
+    "/calculators",
+    "/government-links",
+    "/news",
   ];
-  return routes.map((path) => ({
+  const [projects, developers] = await Promise.all([getProjects(), getDevelopers()]);
+  const staticPages: MetadataRoute.Sitemap = routes.map((path) => ({
     url: `${publicSite.url}${path}`,
     changeFrequency: "monthly",
     priority: path === "" ? 1 : 0.7,
   }));
+  return [
+    ...staticPages,
+    ...projects.filter(isPublicProject).map((project) => ({ url: `${publicSite.url}/projects/${project.slug}` })),
+    ...developers.filter((developer) => developer.status === "active").map((developer) => ({ url: `${publicSite.url}/developers/${developer.slug}` })),
+    ...mockNewsUpdates.filter((news) => news.isPublished).map((news) => ({
+      url: `${publicSite.url}/news/${news.slug}`,
+      ...(news.lastCheckedDate ? { lastModified: news.lastCheckedDate } : {}),
+    })),
+  ];
 }
