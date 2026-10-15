@@ -1,12 +1,10 @@
-import React from "react";
-import { Metadata } from "next";
-import { HomeLoanEmiDetailedCalculator } from "@/components/calculators/HomeLoanEmiDetailedCalculator";
-
-export const metadata: Metadata = {
-  title: "Home Loan EMI Calculator | MS Legacy",
-  description: "Analyze monthly outflows, interest splits, prepayment benefits, and debt-to-income limits. Planning estimates only."
-};
-
-export default function HomeLoanEmiPage() {
-  return <HomeLoanEmiDetailedCalculator />;
+import { PlanningToolNotice } from "@/components/public/PlanningToolNotice";
+import { pageMetadata } from "@/lib/publicSite";
+export const metadata = pageMetadata(
+  "Home Loan EMI Planning",
+  "This planning tool is under review. Discuss property-specific inputs and assumptions with MS LEGACY.",
+  "/calculators/home-loan-emi",
+);
+export default function ToolPage() {
+  return <PlanningToolNotice title="Home Loan EMI Planning" />;
 }

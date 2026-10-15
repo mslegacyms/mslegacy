@@ -1,11 +1,6 @@
-import { MetadataRoute } from "next";
-
-/**
- * Generates the robots.txt file dynamically in Next.js App Router.
- */
+import type { MetadataRoute } from "next";
+import { publicSite } from "@/lib/publicSite";
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mslegacy.in";
-
   return {
     rules: {
       userAgent: "*",
@@ -15,8 +10,10 @@ export default function robots(): MetadataRoute.Robots {
         "/partner/",
         "/client/",
         "/login",
+        "/project-enquiry",
+        "/requirements/",
       ],
     },
-    sitemap: `${baseUrl}/sitemap.xml`,
+    sitemap: `${publicSite.url}/sitemap.xml`,
   };
 }

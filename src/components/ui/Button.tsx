@@ -8,18 +8,32 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = "primary", size = "md", fullWidth = false, children, ...props }, ref) => {
+  (
+    {
+      className,
+      variant = "primary",
+      size = "md",
+      fullWidth = false,
+      children,
+      ...props
+    },
+    ref,
+  ) => {
     return (
       <button
         ref={ref}
         className={cn(
-          "inline-flex items-center justify-center font-sans font-medium rounded transition-all duration-300 cursor-pointer active:scale-98 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#8b6e3a]",
+          "inline-flex items-center justify-center font-sans font-medium rounded transition-all duration-300 cursor-pointer active:scale-98 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#C2A778]",
           // Variant styles
           {
-            "bg-[#10291f] text-white hover:bg-[#1A2644] border border-[#10291f]": variant === "primary",
-            "bg-[#8b6e3a] text-[#10291f] hover:bg-[#B6966B] border border-[#8b6e3a]": variant === "secondary",
-            "bg-transparent text-[#10291f] border border-[#10291f]/20 hover:bg-[#10291f]/5 hover:border-[#10291f]": variant === "outline",
-            "bg-transparent text-[#10291f] hover:underline p-0": variant === "text",
+            "bg-[#0F291E] text-white hover:bg-[#203E30] border border-[#0F291E]":
+              variant === "primary",
+            "bg-[#C2A778] text-[#0F291E] hover:bg-[#D2BC93] border border-[#C2A778]":
+              variant === "secondary",
+            "bg-transparent text-[#0F291E] border border-[#0F291E]/20 hover:bg-[#0F291E]/5 hover:border-[#0F291E]":
+              variant === "outline",
+            "bg-transparent text-[#0F291E] hover:underline p-0":
+              variant === "text",
           },
           // Size styles
           {
@@ -29,14 +43,14 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           },
           // Width style
           fullWidth ? "w-full" : "",
-          className
+          className,
         )}
         {...props}
       >
         {children}
       </button>
     );
-  }
+  },
 );
 
 Button.displayName = "Button";
