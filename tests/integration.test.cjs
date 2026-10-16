@@ -46,3 +46,24 @@ test('sitemap uses the public catalog and excludes private records and enquiry p
   assert.ok(!urls.includes('https://example.test/developers/inactive'));
   assert.ok(!urls.some(url => /\/(crm|client|partner|requirements|project-enquiry)(\/|$)/.test(url)));
 });
+
+test('reviewed enquiry rejects blank names, phone letters, repeated plus signs and oversized numbers', () => {
+  const { validateEnquiryDraft } = loadTs('src/lib/validation/enquiry.ts');
+  const valid = { name: 'Test Enquiry', channel: 'phone', contact: '+91 90356 87671' };
+  assert.equal(validateEnquiryDraft(valid), null);
+  for (const name of ['  ', 'A', 'A'.repeat(101), 'Test\nName']) {
+    assert.equal(validateEnquiryDraft({ ...valid, name }).field, 'name');
+  }
+  for (const contact of ['invalid12345678', '++919035687671', '1234567', '1234567890123456', '12345678\nextra']) {
+    assert.equal(validateEnquiryDraft({ ...valid, contact }).field, 'contact');
+  }
+  assert.equal(validateEnquiryDraft({ ...valid, channel: 'whatsapp', contact: '(080) 1234-5678' }), null);
+  assert.equal(validateEnquiryDraft({ ...valid, channel: 'email', contact: 'test@example.invalid' }), null);
+  assert.equal(validateEnquiryDraft({ ...valid, channel: 'email', contact: 'test@invalid' }).field, 'contact');
+});
+
+test('all public service choices retain their intent through the common enquiry validator', () => {
+  const { enquiryOptions, getEnquiryIntent } = loadTs('src/lib/validation/enquiry.ts');
+  for (const [value] of enquiryOptions) assert.equal(getEnquiryIntent(value, false), value);
+  assert.equal(getEnquiryIntent('unrecognized', false), 'general_advisory');
+});
