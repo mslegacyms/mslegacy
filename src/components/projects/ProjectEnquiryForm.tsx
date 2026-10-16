@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { publicSite } from "@/lib/publicSite";
+import { enquiryOptions, validateEnquiryDraft, type EnquiryDraftError } from "@/lib/validation/enquiry";
 
 interface ProjectEnquiryFormProps {
   projectId?: string;
@@ -12,24 +13,7 @@ interface ProjectEnquiryFormProps {
   selectedProjects?: { id: string; name: string }[];
   initialMessage?: string;
 }
-const interests = [
-  ["general_advisory", "General property enquiry"],
-  ["land_sourcing", "Land & property sourcing"],
-  ["construction_support", "Construction & project management"],
-  ["property_management", "Property management"],
-  ["project_due_diligence", "Document review coordination"],
-  ["nri_advisory", "NRI property support"],
-  ["project_comparison", "Compare selected properties"],
-  ["site_visit_support", "Request a site visit"],
-  ["apartment_enquiry", "Apartment enquiry"],
-  ["plot_enquiry", "Plot enquiry"],
-  ["villa_enquiry", "Villa enquiry"],
-  ["farmland_enquiry", "Land-use enquiry"],
-  ["channel_partner", "Channel partner enquiry"],
-  ["landowner_developer", "Landowner / developer collaboration"],
-  ["apartment_feasibility_review", "Apartment feasibility discussion"],
-  ["layout_feasibility_review", "Layout feasibility discussion"],
-] as const;
+const interests = enquiryOptions;
 
 export function ProjectEnquiryForm({
   projectId,
@@ -40,6 +24,8 @@ export function ProjectEnquiryForm({
 }: ProjectEnquiryFormProps) {
   const uid = useId();
   const draftRef = useRef<HTMLElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
+  const contactRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState("");
   const [channel, setChannel] = useState("phone");
   const [contact, setContact] = useState("");
@@ -52,7 +38,7 @@ export function ProjectEnquiryForm({
   const [budget, setBudget] = useState("");
   const [message, setMessage] = useState(initialMessage.slice(0, 4000));
   const [prepared, setPrepared] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<EnquiryDraftError | null>(null);
   const [copyStatus, setCopyStatus] = useState("");
   const serviceLabel =
     interests.find((item) => item[0] === interest)?.[1] ||
@@ -85,12 +71,13 @@ export function ProjectEnquiryForm({
   }, [prepared]);
   function prepare(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError("");
+    setError(null);
     setCopyStatus("");
-    if (channel !== "email" && contact.replace(/\D/g, "").length < 8) {
-      setError(
-        "Please enter a phone number with at least 8 digits, including the country code where needed.",
-      );
+    const validation = validateEnquiryDraft({ name, channel, contact });
+    if (validation) {
+      setPrepared(false);
+      setError(validation);
+      (validation.field === "name" ? nameRef : contactRef).current?.focus();
       return;
     }
     setPrepared(true);
@@ -132,7 +119,7 @@ export function ProjectEnquiryForm({
         onSubmit={prepare}
         onChange={() => {
           setPrepared(false);
-          setError("");
+          setError(null);
         }}
         className="site-enquiry-form"
       >
@@ -142,6 +129,7 @@ export function ProjectEnquiryForm({
           </label>
           <input
             id={`${uid}-name`}
+            ref={nameRef}
             name="name"
             autoComplete="name"
             required
@@ -149,6 +137,8 @@ export function ProjectEnquiryForm({
             maxLength={100}
             value={name}
             onChange={(event) => setName(event.target.value)}
+            aria-describedby={error?.field === "name" ? `${uid}-error` : undefined}
+            aria-invalid={error?.field === "name" || undefined}
           />
         </div>
         <div className="site-form-grid">
@@ -178,15 +168,16 @@ export function ProjectEnquiryForm({
             </label>
             <input
               id={`${uid}-contact`}
+              ref={contactRef}
               name={channel === "email" ? "email" : "tel"}
               type={channel === "email" ? "email" : "tel"}
               autoComplete={channel === "email" ? "email" : "tel"}
               required
-              maxLength={150}
+              maxLength={channel === "email" ? 254 : 30}
               value={contact}
               onChange={(event) => setContact(event.target.value)}
-              aria-describedby={error ? `${uid}-error` : undefined}
-              aria-invalid={error ? true : undefined}
+              aria-describedby={error?.field === "contact" ? `${uid}-error` : undefined}
+              aria-invalid={error?.field === "contact" || undefined}
             />
           </div>
         </div>
@@ -255,7 +246,7 @@ export function ProjectEnquiryForm({
         </label>
         {error && (
           <p id={`${uid}-error`} role="alert" className="site-form-error">
-            {error}
+            {error.message}
           </p>
         )}
         <button className="site-button" type="submit">
