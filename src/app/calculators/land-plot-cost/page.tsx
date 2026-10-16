@@ -1,10 +1,12 @@
-import { PlanningToolNotice } from "@/components/public/PlanningToolNotice";
-import { pageMetadata } from "@/lib/publicSite";
-export const metadata = pageMetadata(
-  "Land & Plot Cost Planning",
-  "This planning tool is under review. Discuss property-specific inputs and assumptions with MS LEGACY.",
-  "/calculators/land-plot-cost",
-);
-export default function ToolPage() {
-  return <PlanningToolNotice title="Land & Plot Cost Planning" />;
+import React from "react";
+import { Metadata } from "next";
+import { LandPlotCostDetailedCalculator } from "@/components/calculators/LandPlotCostDetailedCalculator";
+
+export const metadata: Metadata = {
+  title: "Land & Plot Cost Calculator | MS Legacy",
+  description: "Proportion base land rates, registration duties, survey sketch costs, and boundary fencing expenses. Planning estimates only."
+};
+
+export default function LandPlotCostPage() {
+  return <LandPlotCostDetailedCalculator />;
 }

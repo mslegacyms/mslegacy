@@ -1,10 +1,12 @@
-import { PlanningToolNotice } from "@/components/public/PlanningToolNotice";
-import { pageMetadata } from "@/lib/publicSite";
-export const metadata = pageMetadata(
-  "Buyer Affordability Planning",
-  "This planning tool is under review. Discuss property-specific inputs and assumptions with MS LEGACY.",
-  "/calculators/buyer-affordability",
-);
-export default function ToolPage() {
-  return <PlanningToolNotice title="Buyer Affordability Planning" />;
+import React from "react";
+import { Metadata } from "next";
+import { BuyerAffordabilityDetailedCalculator } from "@/components/calculators/BuyerAffordabilityDetailedCalculator";
+
+export const metadata: Metadata = {
+  title: "Buyer Affordability Calculator | MS Legacy",
+  description: "Assess safe purchasing power, down-payment parameters, and debt-to-income buffers. Planning estimates only."
+};
+
+export default function BuyerAffordabilityPage() {
+  return <BuyerAffordabilityDetailedCalculator />;
 }

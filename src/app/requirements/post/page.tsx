@@ -1,17 +1,11 @@
-import { PublicIntro, PublicCTA } from "@/components/public/PublicComponents";
-export const metadata = {
-  title: "Share Your Property Requirement",
-  robots: { index: false, follow: true },
+import { Metadata } from "next";
+import PostRequirementClient from "./PostRequirementClient";
+
+export const metadata: Metadata = {
+  title: "Post Your Property Requirement | MS Legacy",
+  description: "Submit your apartment, plot, villa, farmland, rental, land, or Joint Development requirement to MS Legacy's demand exchange board.",
 };
+
 export default function PostRequirementPage() {
-  return (
-    <>
-      <PublicIntro
-        eyebrow="Property requirement"
-        title="Share your requirement directly."
-        description="The public exchange is not accepting posts here. Prepare an enquiry to discuss your requirement with the team."
-      />
-      <PublicCTA />
-    </>
-  );
+  return <PostRequirementClient />;
 }

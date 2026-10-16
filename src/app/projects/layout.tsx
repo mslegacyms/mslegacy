@@ -1,9 +1,10 @@
-import { pageMetadata } from "@/lib/publicSite";
-export const metadata = pageMetadata(
-  "Property Information & Research",
-  "Browse property information, compare options and discuss current details with MS LEGACY. Confirm price, availability and evidence for each property.",
-  "/projects",
-);
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Property Projects in Karnataka | Apartments, Plots & Farmlands | MS Legacy",
+  description: "Explore catalogued gated communities, high-rise apartments, and managed farm plots. Backed by 30-year mother deed title clearance checks."
+};
+
 export default function ProjectsLayout({
   children,
 }: {
