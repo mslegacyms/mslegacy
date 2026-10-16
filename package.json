@@ -9,7 +9,7 @@
     "lint": "eslint",
     "test": "node --test tests/*.test.cjs",
     "typecheck": "tsc --noEmit",
-    "lint:repairs": "eslint src/app/login src/app/actions src/app/contact/actions.ts src/app/channel-partners/actions.ts src/lib/auth src/lib/supabase src/lib/env.ts src/lib/validation/intake.ts src/lib/validation/enquiry.ts src/lib/calculators/financialMath.ts src/lib/crm/leads.ts src/lib/crm/activities.ts src/lib/crm/legalDocumentsStore.ts src/lib/company src/lib/storage/documents.ts src/lib/site.ts src/components/crm/LeadsDirectory.tsx src/components/crm/LeadPipeline.tsx src/components/legal-documents/DocumentText.tsx src/components/analytics/AnalyticsProvider.tsx src/app/privacy src/app/terms tests src/lib/publicSite.ts src/lib/enquiryPresentation.ts src/app/sitemap.ts src/components/projects/ProjectEnquiryForm.tsx src/components/projects/ProjectComparisonTable.tsx src/app/layout.tsx src/components/layout/Footer.tsx"
+    "lint:repairs": "eslint src/app/login src/app/actions src/app/contact/actions.ts src/app/channel-partners/actions.ts src/lib/auth src/lib/supabase src/lib/env.ts src/lib/validation/intake.ts src/lib/validation/enquiry.ts src/lib/calculators/financialMath.ts src/lib/crm/leads.ts src/lib/crm/activities.ts src/lib/crm/legalDocumentsStore.ts src/lib/company src/lib/storage/documents.ts src/lib/site.ts src/components/crm/LeadsDirectory.tsx src/components/crm/LeadPipeline.tsx src/components/legal-documents/DocumentText.tsx src/components/analytics/AnalyticsProvider.tsx src/app/privacy src/app/terms tests"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.0",

@@ -1,10 +1,12 @@
-import { PlanningToolNotice } from "@/components/public/PlanningToolNotice";
-import { pageMetadata } from "@/lib/publicSite";
-export const metadata = pageMetadata(
-  "Property Shortlist Review",
-  "This planning tool is under review. Discuss property-specific inputs and assumptions with MS LEGACY.",
-  "/calculators/project-shortlist-score",
-);
-export default function ToolPage() {
-  return <PlanningToolNotice title="Property Shortlist Review" />;
+import React from "react";
+import { Metadata } from "next";
+import { ProjectShortlistScoreDetailedCalculator } from "@/components/calculators/ProjectShortlistScoreDetailedCalculator";
+
+export const metadata: Metadata = {
+  title: "Project Shortlist Score Calculator | MS Legacy",
+  description: "Score and compare multiple layout or apartment prospects objectively on key statutory metrics. Planning estimates only."
+};
+
+export default function ProjectShortlistScorePage() {
+  return <ProjectShortlistScoreDetailedCalculator />;
 }
